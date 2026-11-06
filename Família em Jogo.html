@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1040">
+<title>Família em Jogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+:root{--ok:#22c55e;--bad:#ef4444;--gold:#fbbf24;--muted:#c7c2f0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overscroll-behavior:none}
+body{font-family:'Baloo 2',system-ui,sans-serif;color:#fff;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;background:#1a1040;overflow:hidden}
+input{user-select:text;-webkit-user-select:text}
+.bgfx{position:fixed;inset:-20%;z-index:0;background:radial-gradient(circle at 20% 20%,#7c3aed 0,transparent 35%),radial-gradient(circle at 80% 30%,#ec4899 0,transparent 30%),radial-gradient(circle at 50% 90%,#0ea5e9 0,transparent 35%);animation:drift 14s ease-in-out infinite alternate;filter:blur(10px);opacity:.75}
+@keyframes drift{to{transform:translate(6%,-4%) rotate(8deg)}}
+.app{position:relative;z-index:1;height:100%;max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 12px)}
+#view{height:100%;display:flex;flex-direction:column}
+#view.anim{animation:in .35s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.title{font-family:'Lilita One',cursive;font-size:56px;line-height:.95;text-align:center;margin:0;background:linear-gradient(180deg,#fff 30%,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 #4c1d95)}
+.h2{font-family:'Lilita One';font-size:34px;text-align:center;margin:4px 0 8px;line-height:1.05}
+.sub{color:var(--muted);text-align:center;font-size:17px;margin:6px 0}
+.small{font-size:14px;color:var(--muted)}
+button{font-family:'Baloo 2',sans-serif;font-weight:800;border:0;border-radius:20px;color:#fff;cursor:pointer;font-size:21px;padding:13px 18px;background:#7c3aed;box-shadow:0 6px 0 rgba(0,0,0,.35);transition:transform .08s}
+button:active{transform:translateY(4px) scale(.98);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+button:disabled{opacity:.45}
+.btn-ok{background:linear-gradient(180deg,#34d399,#16a34a)}
+.btn-skip{background:linear-gradient(180deg,#a1a1aa,#52525b)}
+.btn-pink{background:linear-gradient(180deg,#f472b6,#db2777)}
+.btn-blue{background:linear-gradient(180deg,#60a5fa,#2563eb)}
+.btn-gold{background:linear-gradient(180deg,#fcd34d,#f59e0b);color:#3b0764}
+.ghost{background:rgba(0,0,0,.3);box-shadow:none;font-size:16px;padding:9px 14px}
+.wide{width:100%;font-size:24px;padding:16px;margin-top:10px}
+.spacer{flex:1}
+.scroll{flex:1;overflow-y:auto;margin:0 -4px;padding:0 4px 10px;-webkit-overflow-scrolling:touch}
+.card{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:22px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:17px;color:#fde68a;letter-spacing:.03em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:15px;padding:7px 13px;border-radius:999px;background:rgba(0,0,0,.3);box-shadow:none;border:2px solid transparent;font-weight:700}
+.chip.sel{background:#7c3aed;border-color:#ddd6fe}
+.chip.mix{background:linear-gradient(90deg,#ec4899,#8b5cf6,#0ea5e9)}
+.row{display:flex;gap:10px;align-items:center}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.topbar .ghost{font-size:14px;padding:6px 12px}
+.pill{background:rgba(0,0,0,.3);border-radius:99px;padding:4px 12px;font-size:14px;font-weight:700}
+.bigemoji{font-size:96px;text-align:center;line-height:1;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) rotate(6deg)}}
+.title .wob{background:inherit;-webkit-background-clip:text;background-clip:text;color:transparent}
+.wob{display:inline-block;animation:wob 2.2s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) scale(1.05)}}
+.teamname{font-family:'Lilita One';font-size:38px;text-align:center;line-height:1.05;margin:6px 0}
+
+/* modos */
+.mode{display:flex;gap:12px;align-items:center;border-radius:22px;padding:12px;margin-bottom:10px;background:rgba(0,0,0,.28);border:3px solid transparent;cursor:pointer;width:100%;text-align:left;box-shadow:0 5px 0 rgba(0,0,0,.3)}
+.mode.sel{border-color:#fff}
+.mode .me{font-size:44px;width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex:none}
+.mode b{font-size:21px;display:block;line-height:1.1}
+.mode span{font-size:14px;color:var(--muted);font-weight:600;line-height:1.2;display:block}
+.mode .help{margin-left:auto;font-size:14px;padding:6px 10px;flex:none}
+
+/* pessoas */
+.person{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:16px;padding:7px 10px;margin-bottom:7px;border-left:6px solid #7c3aed}
+.person .av{font-size:30px;width:46px;height:46px;border-radius:14px;padding:0;background:rgba(255,255,255,.15);box-shadow:none;flex:none}
+.person input{flex:1;min-width:0;font:700 19px 'Baloo 2';color:#fff;background:transparent;border:0;outline:none;border-bottom:2px dashed rgba(255,255,255,.3)}
+.txt{width:100%;font:800 24px 'Baloo 2';color:#fff;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.25);border-radius:16px;padding:10px 14px;outline:none;text-align:center}
+.codein{letter-spacing:.4em;text-transform:uppercase;font-size:34px;font-family:'Lilita One'}
+.avgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.avgrid button{font-size:26px;padding:4px 0;background:rgba(0,0,0,.25);box-shadow:none;border:2px solid transparent;border-radius:12px}
+.avgrid button.sel{border-color:#fff;background:#7c3aed}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sw{width:58px;height:32px;border-radius:99px;background:rgba(0,0,0,.4);position:relative;padding:0;box-shadow:none;flex:none}
+.sw::after{content:'';position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--ok)}.sw.on::after{left:30px}
+.plist{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{background:rgba(0,0,0,.3);border-radius:99px;padding:3px 12px 3px 6px;font-weight:700;font-size:16px;display:flex;align-items:center;gap:4px}
+.pchip.off{opacity:.4}
+.pchip.me{outline:2px solid #fde68a}
+.bigcode{font-family:'Lilita One';font-size:64px;letter-spacing:.18em;text-align:center;line-height:1;color:#fde68a;margin:4px 0}
+
+/* placar */
+.board{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.sc{flex:1;min-width:70px;max-width:120px;text-align:center;border-radius:16px;padding:4px 4px 6px;background:rgba(0,0,0,.3);opacity:.55;transition:.25s;border:3px solid transparent}
+.sc.cur{opacity:1;transform:scale(1.05)}
+.sc .e{font-size:20px;line-height:1.1}.sc .n{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc .p{font-family:'Lilita One';font-size:26px;line-height:1}
+
+/* timer */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ring{position:relative;width:86px;height:86px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Lilita One';font-size:32px}
+.ring.low b{color:var(--bad);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.2)}}
+.pts{font-family:'Lilita One';font-size:42px;text-align:right;line-height:1}
+.pts small{display:block;font-family:'Baloo 2';font-size:13px;color:var(--muted)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;position:relative;flex-direction:column}
+
+/* cartão */
+.wcard{width:100%;min-height:52%;border-radius:30px;padding:22px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#fff,#ede9fe);color:#2e1065;box-shadow:0 14px 0 rgba(0,0,0,.25),0 20px 50px rgba(0,0,0,.4);position:relative;animation:deal .35s ease-out}
+@keyframes deal{from{transform:translateY(60px) scale(.8) rotate(-6deg);opacity:0}}
+.wcard.gold{background:linear-gradient(160deg,#fef3c7,#fbbf24)}
+.wcard .cat{font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;margin-bottom:4px}
+.wcard .word{font-family:'Lilita One';font-size:clamp(36px,11vw,60px);line-height:1.03;word-break:break-word}
+.wcard .twist{margin-top:14px;background:#db2777;color:#fff;border-radius:14px;padding:6px 12px;font-weight:800;font-size:17px}
+.wcard .badge{position:absolute;top:-14px;right:14px;background:#f59e0b;color:#3b0764;font-weight:800;border-radius:12px;padding:2px 10px;font-size:15px}
+.wcard.imp{background:linear-gradient(160deg,#fecaca,#ef4444);color:#450a0a}
+.peek{touch-action:none;cursor:pointer}
+.peek .inner{display:none}
+.peek .cover{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Lilita One';font-size:28px;color:#6d28d9}
+.peek .cover .ic{font-size:64px;animation:bob 1.4s infinite}
+.peek .cover small{font-family:'Baloo 2';font-size:15px;color:#7c3aed}
+.peek.show .inner{display:block}
+.peek.show .cover{display:none}
+.peek.show{transform:scale(1.02)}
+.ctrls{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:12px}
+.ctrls .btn-ok{font-size:26px}
+.mini{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
+
+/* segurar */
+.hold{position:relative;overflow:hidden;width:100%;font-size:23px;padding:18px;margin-top:10px;touch-action:none}
+.hold .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.35)}
+.hold.holding .fill{width:100%;transition:width .9s linear}
+.hold span{position:relative}
+
+/* quiz */
+.qtext{font-family:'Lilita One';font-size:clamp(24px,7vw,34px);line-height:1.15;text-align:center;background:#fff;color:#2e1065;border-radius:24px;padding:18px 14px;box-shadow:0 8px 0 rgba(0,0,0,.25);margin:10px 0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{min-height:88px;font-size:19px;line-height:1.15;padding:10px;display:flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+.o0{background:linear-gradient(180deg,#f87171,#dc2626)}.o1{background:linear-gradient(180deg,#60a5fa,#2563eb)}
+.o2{background:linear-gradient(180deg,#fbbf24,#d97706)}.o3{background:linear-gradient(180deg,#4ade80,#16a34a)}
+.opt.dim{opacity:.3}.opt.right{outline:5px solid #fff;animation:bump .6s}.opt.wrong{opacity:.5;text-decoration:line-through}
+@keyframes bump{40%{transform:scale(1.08)}}
+
+/* listas */
+.list{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,0,0,.25);border-radius:14px;padding:8px 12px;font-size:18px;font-weight:700;width:100%;box-shadow:none;text-align:left}
+.li.no{opacity:.55}
+.li.no .w{text-decoration:line-through}
+.tag{font-size:14px;padding:2px 10px;border-radius:99px;background:var(--ok);flex:none}
+.li.no .tag{background:#52525b}
+.vote{display:flex;align-items:center;gap:10px;justify-content:flex-start;font-size:22px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:10px 0 6px;height:210px}
+.pod{flex:1;max-width:120px;text-align:center}
+.pod .e{font-size:40px}.pod .n{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod .b{border-radius:14px 14px 4px 4px;font-family:'Lilita One';font-size:28px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;animation:rise .8s ease-out both;transform-origin:bottom}
+@keyframes rise{from{transform:scaleY(0)}}
+.result{font-family:'Lilita One';font-size:44px;text-align:center;line-height:1.05;margin:8px 0}
+
+/* overlays */
+canvas#conf{position:fixed;inset:0;z-index:40;pointer-events:none;width:100%;height:100%}
+.flash{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0}
+.flash.go{animation:fl .45s}
+@keyframes fl{0%{opacity:.5}to{opacity:0}}
+.streak{position:fixed;left:0;right:0;top:36%;text-align:center;z-index:15;pointer-events:none;font-family:'Lilita One';font-size:44px;color:var(--gold);text-shadow:0 4px 0 #7c2d12;opacity:0}
+.streak.go{animation:streak 1s ease-out}
+@keyframes streak{0%{opacity:0;transform:scale(.3) rotate(-10deg)}25%{opacity:1;transform:scale(1.2) rotate(4deg)}100%{opacity:0;transform:translateY(-60px)}}
+.count{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(26,16,64,.94)}
+.count.on{display:flex}
+.count span{font-family:'Lilita One';font-size:170px;animation:zoom .8s ease-out forwards}
+@keyframes zoom{from{transform:scale(2.4);opacity:0}30%{opacity:1}to{transform:scale(.8);opacity:.2}}
+.overlay{position:fixed;inset:0;z-index:35;background:rgba(15,10,40,.9);display:none;align-items:flex-end;justify-content:center}
+.overlay.on{display:flex}
+.sheet{width:100%;max-width:520px;max-height:90%;overflow-y:auto;background:linear-gradient(180deg,#3b2a8a,#24185c);border-radius:28px 28px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);animation:up .3s ease-out}
+@keyframes up{from{transform:translateY(100%)}}
+.step{display:flex;gap:12px;align-items:flex-start;margin:10px 0;font-size:17px;line-height:1.3}
+.step .n{flex:none;width:34px;height:34px;border-radius:50%;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-family:'Lilita One';font-size:19px}
+.tipbox{background:rgba(251,191,36,.15);border:2px dashed #fbbf24;border-radius:16px;padding:10px 12px;font-size:16px;margin-top:8px}
+.shake{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.wait{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:17px;margin-top:10px}
+.dots span{animation:blink 1.2s infinite;font-size:26px}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{50%{opacity:.2}}
+
+/* ===== v3 extras ===== */
+.teamstripe{position:fixed;left:0;right:0;top:0;height:6px;z-index:5}
+.gamegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gcard{border-radius:22px;padding:12px 10px;background:rgba(0,0,0,.28);border:3px solid transparent;box-shadow:0 5px 0 rgba(0,0,0,.3);text-align:center;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px}
+.gcard.sel{border-color:#fff;transform:scale(1.03)}
+.gcard .ge{font-size:40px;width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center}
+.gcard b{font-size:17px;line-height:1.1}
+.gcard span{font-size:12px;color:var(--muted);font-weight:600;line-height:1.15}
+.gcard .q{position:absolute;top:6px;right:6px;font-size:13px;padding:3px 8px;border-radius:99px;background:rgba(0,0,0,.35)}
+.gcard .badge2{position:absolute;top:6px;left:6px;font-size:10px;padding:2px 6px;border-radius:99px;background:#0ea5e9;font-weight:800}
+.seg{display:flex;background:rgba(0,0,0,.3);border-radius:16px;padding:4px;gap:4px}
+.seg button{flex:1;font-size:16px;padding:10px;background:transparent;box-shadow:none;border-radius:12px}
+.seg button.sel{background:#7c3aed}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tbox{border-radius:18px;padding:8px;background:rgba(0,0,0,.25);border:3px solid transparent;min-height:90px}
+.tbox.mine{border-color:#fff}
+.tbox .th{display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px;margin-bottom:4px}
+.tbox .th .ta{font-size:24px}
+.tbox .mem{font-size:14px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,.12);margin:3px 0;display:block;width:100%;text-align:left;box-shadow:none;color:#fff}
+.tbox .jb{width:100%;font-size:14px;padding:6px;margin-top:4px;box-shadow:none}
+.tname{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tname .dot{width:22px;height:22px;border-radius:50%;flex:none}
+.tname input{flex:1;min-width:0;font:700 17px 'Baloo 2';color:#fff;background:rgba(0,0,0,.25);border:0;border-radius:10px;padding:6px 10px;outline:none}
+.tname button{font-size:22px;padding:2px 6px;background:rgba(255,255,255,.12);box-shadow:none;border-radius:10px}
+.react{display:flex;justify-content:center;gap:4px;margin-top:8px;flex-wrap:wrap}
+.react button{font-size:22px;padding:4px 8px;background:rgba(0,0,0,.3);box-shadow:none;border-radius:14px}
+.qa{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.qa button{font-size:18px;padding:10px}
+.floater{position:fixed;z-index:45;pointer-events:none;font-size:46px;text-align:center;animation:floatup 2.6s ease-out forwards}
+.floater small{display:block;font-size:12px;font-weight:800;background:rgba(0,0,0,.55);border-radius:99px;padding:0 8px;color:#fff}
+.floater.txt{font-family:'Lilita One';font-size:34px;color:#fff;text-shadow:0 3px 0 #000}
+@keyframes floatup{0%{transform:translateY(0) scale(.5);opacity:0}15%{transform:translateY(-30px) scale(1.15);opacity:1}100%{transform:translateY(-280px) scale(1);opacity:0}}
+.rules{background:rgba(255,255,255,.1);border-radius:22px;padding:12px 14px;margin:8px 0}
+.role{background:linear-gradient(90deg,#f59e0b,#ec4899);border-radius:18px;padding:10px 14px;font-weight:800;font-size:18px;text-align:center;margin:8px 0}
+.readyl{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.readyl span{font-size:14px;font-weight:700;background:rgba(0,0,0,.3);border-radius:99px;padding:2px 10px}
+.readyl span.ok{background:#16a34a}
+/* desenho */
+.cvwrap{position:relative;width:100%;aspect-ratio:1/1;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 10px 0 rgba(0,0,0,.25);touch-action:none}
+.cvwrap canvas{width:100%;height:100%;display:block;touch-action:none}
+.tools{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:8px;flex-wrap:wrap}
+.tools .col{width:34px;height:34px;border-radius:50%;padding:0;box-shadow:none;border:3px solid rgba(255,255,255,.4)}
+.tools .col.sel{border-color:#fff;transform:scale(1.15)}
+.tools .tb{font-size:15px;padding:6px 10px;background:rgba(0,0,0,.35);box-shadow:none}
+.tools .tb.sel{background:#7c3aed}
+.wordbar{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#2e1065;border-radius:16px;padding:8px 12px;margin-bottom:8px;font-weight:800;min-height:48px}
+.wordbar.peek .cover{font-family:'Baloo 2';font-size:17px;flex-direction:row;color:#6d28d9}
+.wordbar.peek .cover .ic{font-size:24px;animation:none}
+.wordbar .inner b{font-family:'Lilita One';font-size:26px}
+/* stop */
+.letter{font-family:'Lilita One';font-size:84px;line-height:1;text-align:center;color:#fde68a;text-shadow:0 6px 0 #7c2d12}
+.sfield{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sfield label{width:38%;font-weight:800;font-size:15px;line-height:1.1}
+.sfield input{flex:1;min-width:0;font:700 19px 'Baloo 2';color:#2e1065;background:#fff;border:3px solid transparent;border-radius:14px;padding:8px 10px;outline:none}
+.sfield input.okl{border-color:#22c55e}
+.sfield input.bad{border-color:#ef4444}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.25);margin:4px 0;font-weight:700;width:100%;box-shadow:none;color:#fff;font-size:16px;text-align:left}
+.srow.inv .w{text-decoration:line-through;opacity:.5}
+.pt{min-width:38px;text-align:center;border-radius:99px;padding:0 8px;font-size:14px;font-weight:800}
+.p20{background:#f59e0b}.p10{background:#16a34a}.p5{background:#2563eb}.p0{background:#52525b}
+/* bomba */
+.bomb{font-size:150px;text-align:center;line-height:1;animation:shakeb .25s infinite}
+@keyframes shakeb{0%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.08)}100%{transform:rotate(-8deg) scale(1)}}
+.boom{font-size:170px;text-align:center;line-height:1;animation:boom .6s ease-out}
+@keyframes boom{0%{transform:scale(.2)}60%{transform:scale(1.4)}100%{transform:scale(1)}}
+.prompt{font-family:'Lilita One';font-size:34px;text-align:center;line-height:1.1;background:#fff;color:#2e1065;border-radius:22px;padding:14px;box-shadow:0 8px 0 rgba(0,0,0,.25);margin:10px 0}
+.emojiq{font-size:70px;text-align:center;letter-spacing:4px;background:#fff;border-radius:24px;padding:14px;box-shadow:0 8px 0 rgba(0,0,0,.25);margin:10px 0;line-height:1.2}
+.expl{background:rgba(255,255,255,.12);border-radius:14px;padding:8px 12px;font-size:16px;margin-top:8px;text-align:center}
+.award{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,rgba(251,191,36,.25),rgba(236,72,153,.25));border-radius:16px;padding:8px 12px;margin:6px 0;font-weight:800}
+.award .ae{font-size:30px}
+.only{font-size:11px;background:#0ea5e9;border-radius:99px;padding:1px 8px;font-weight:800}
+.react{flex-wrap:nowrap;gap:3px}
+.react button{font-size:20px;padding:4px 6px;flex:1;max-width:46px}
+.bomb{margin:6px 0 14px}
+</style>
+</head>
+<body>
+<div class="bgfx"></div>
+<div class="teamstripe" id="stripe"></div>
+<canvas id="conf"></canvas>
+<div class="flash" id="flash"></div>
+<div class="streak" id="streak"></div>
+<div class="count" id="count"><span id="countN">3</span></div>
+<div class="overlay" id="ov" onclick="if(event.target.id==='ov')closeOv()"><div class="sheet" id="sheet"></div></div>
+<div class="app"><div id="view"></div></div>
+<script>
+/* =================== PALAVRAS (fácil | médio | difícil) =================== */
+const RAW={
+ animais:['🐶 Animais',
+  'Cachorro,Gato,Elefante,Macaco,Girafa,Cobra,Galinha,Pato,Cavalo,Coelho,Sapo,Peixe,Vaca,Porco,Leão,Passarinho,Borboleta,Abelha,Rato,Ovelha',
+  'Canguru,Pinguim,Tartaruga,Polvo,Jacaré,Tubarão,Coruja,Papagaio,Caranguejo,Urso,Formiga,Morcego,Camelo,Foca,Galo,Aranha,Golfinho,Gorila,Zebra,Baleia',
+  'Tamanduá,Bicho-preguiça,Pavão,Avestruz,Camaleão,Ornitorrinco,Lagosta,Flamingo,Ouriço,Cavalo-marinho,Lhama,Esquilo,Água-viva,Pica-pau,Hipopótamo,Rinoceronte'],
+ profissoes:['👷 Profissões',
+  'Médico,Bombeiro,Policial,Professor,Cozinheiro,Motorista,Dentista,Cantor,Jogador de futebol,Palhaço,Pintor,Pedreiro,Enfermeira,Garçom,Padeiro,Carteiro,Fazendeiro,Piloto,Vendedor,Faxineiro',
+  'Cabeleireiro,Fotógrafo,Mágico,Eletricista,Encanador,Jardineiro,Astronauta,Salva-vidas,Goleiro,Mecânico,Pescador,Bailarina,Juiz de futebol,Costureira,Veterinário,Cientista,Repórter,Youtuber,DJ,Marinheiro',
+  'Maestro,Detetive,Arqueólogo,Advogado,Manobrista,Tatuador,Domador de leão,Apicultor,Mergulhador,Escultor,Sapateiro,Tradutor,Engenheiro,Caixa de supermercado,Guia turístico'],
+ acoes:['🏃 Ações',
+  'Escovar os dentes,Tomar banho,Dormir,Comer,Dançar,Nadar,Correr,Chorar,Rir,Pular,Bocejar,Ler um livro,Beber água,Dirigir,Abraçar,Cantar,Escrever,Lavar as mãos,Sentar,Acenar',
+  'Andar de bicicleta,Pescar,Tirar selfie,Lavar louça,Jogar videogame,Pular corda,Fazer churrasco,Pentear o cabelo,Abrir um presente,Chupar limão,Espirrar,Fazer flexão,Comer pipoca,Subir escada,Soprar velas,Empinar pipa,Tocar violão,Se maquiar,Fazer careta,Assobiar',
+  'Trocar fralda,Cortar cebola,Escalar montanha,Remar,Pisar no Lego,Perder o ônibus,Comer comida apimentada,Andar no escuro,Fazer malabarismo,Andar de skate,Abrir pote apertado,Dar nó na gravata,Montar barraca,Andar na corda bamba,Fugir de um cachorro'],
+ objetos:['🧸 Objetos',
+  'Celular,Bola,Cadeira,Óculos,Relógio,Chave,Mochila,Garfo,Escova de dentes,Televisão,Tesoura,Guarda-chuva,Copo,Livro,Colher,Prato,Boné,Sapato,Meia,Carrinho',
+  'Martelo,Vassoura,Liquidificador,Secador de cabelo,Controle remoto,Violão,Travesseiro,Espelho,Lanterna,Escada,Microfone,Câmera,Patins,Computador,Ventilador,Bicicleta,Pente,Fone de ouvido,Lápis,Panela',
+  'Aspirador de pó,Ferro de passar,Carrinho de mercado,Balanço,Rede,Grampeador,Bússola,Binóculo,Paraquedas,Saca-rolhas,Furadeira,Ralador,Ampulheta,Abridor de latas,Cabide'],
+ casa:['🏠 Casa',
+  'Sofá,Cama,Geladeira,Fogão,Porta,Janela,Chuveiro,Mesa,Torneira,Varrer a casa,Arrumar a cama,Lâmpada,Tapete,Banheiro,Cozinha,Cortina,Telhado,Quintal,Armário,Pia',
+  'Lavar louça,Estender roupa,Trocar lâmpada,Regar plantas,Tirar o lixo,Micro-ondas,Máquina de lavar,Campainha,Passar pano no chão,Fazer café,Dobrar roupa,Guarda-roupa,Varal,Ventilador de teto,Abrir o portão,Lavar o quintal,Pendurar quadro,Descascar batata,Pôr a mesa,Chaleira',
+  'Desentupir a pia,Cortar a grama,Procurar o controle remoto,Montar móvel,Pintar a parede,Matar barata,Consertar o chuveiro,Limpar a janela,Mudança de casa,Faxina de sábado,Acordar com despertador,Cair a energia,Goteira no teto,Trocar o botijão de gás,Esquecer a chave pra fora'],
+ comidas:['🍕 Comidas',
+  'Pizza,Pipoca,Sorvete,Banana,Bolo,Pão,Ovo,Maçã,Arroz e feijão,Melancia,Chocolate,Suco,Leite,Biscoito,Uva,Laranja,Morango,Batata frita,Queijo,Frango',
+  'Brigadeiro,Pastel,Coxinha,Macarrão,Hambúrguer,Cachorro-quente,Pão de queijo,Milho,Abacaxi,Algodão-doce,Chiclete,Picolé,Açaí,Sopa,Café,Pirulito,Salada,Panqueca,Gelatina,Pudim',
+  'Feijoada,Cuscuz,Tapioca,Espaguete,Coco,Lasanha,Sushi,Churros,Pamonha,Pé de moleque,Canjica,Fondue,Acarajé,Strogonoff,Bolo de rolo'],
+ esportes:['⚽ Esportes',
+  'Futebol,Vôlei,Basquete,Natação,Corrida,Tênis,Boxe,Ciclismo,Skate,Dança,Ginástica,Bambolê,Pular corda,Balé,Caminhada,Peteca,Chutar bola,Arremesso,Goleiro,Torcida',
+  'Judô,Surfe,Golfe,Pingue-pongue,Levantamento de peso,Capoeira,Boliche,Handebol,Karatê,Queimada,Cabo de guerra,Futsal,Patinete,Yoga,Musculação,Rúgbi,Badminton,Beisebol,Pênalti,Escanteio',
+  'Arco e flecha,Esqui,Hipismo,Salto em altura,Sinuca,Patinação no gelo,Remo,Escalada,Futevôlei,Corrida de saco,Polo aquático,Esgrima,Salto com vara,Ginástica rítmica,Paraquedismo'],
+ escola_fund:['✏️ Escola – Fundamental',
+  'Lápis,Borracha,Caderno,Mochila,Recreio,Professora,Lousa,Lancheira,Apontador,Régua,Cola,Fila,Merenda,Giz de cera,Estojo,Livro,Massinha,Parquinho,Pintura,Carteira',
+  'Prova,Tabuada,Educação física,Biblioteca,Dever de casa,Ditado,Chamada,Sinal do recreio,Globo terrestre,Mapa,Dicionário,Uniforme,Ônibus escolar,Calculadora,Desenho,Leitura,Alfabeto,Coordenadora,Cantina,Quadra',
+  'Feira de ciências,Apresentação de trabalho,Colar na prova,Diretoria,Esquecer o dever de casa,Hino Nacional,Passeio da escola,Olimpíada de matemática,Cantar parabéns na sala,Reunião de pais,Festa junina da escola,Boletim,Recuperação,Trabalho em grupo,Excursão'],
+ escola_medio:['🎓 Escola – Médio',
+  'Calculadora,Microscópio,Laboratório,Redação,Vestibular,ENEM,Ímã,Vulcão,Planeta,Foguete,Telescópio,Química,Física,Biologia,História,Geografia,Matemática,Literatura,Filosofia,Mapa-múndi',
+  'Fotossíntese,Gravidade,Terremoto,Átomo,Equação,Esqueleto humano,Coração batendo,Revolução,Descobrimento do Brasil,Independência do Brasil,Eletricidade,Reciclagem,Arco-íris,Dinossauro,Furacão,Lua cheia,Bactéria,Vírus,Pulmão,Imã atraindo metal',
+  'DNA,Evolução,Sistema solar,Célula,Ângulo reto,Velocidade,Eclipse,Ciclo da água,Pirâmides do Egito,Abolição da escravatura,Reação química,Big Bang,Tabela periódica,Teorema de Pitágoras,Efeito estufa'],
+ enfermagem:['🩺 Enfermagem',
+  'Termômetro,Injeção,Curativo,Maca,Vacina,Luva,Máscara,Ambulância,Cadeira de rodas,Remédio,Hospital,Band-aid,Febre,Tosse,Dor de cabeça,Algodão,Jaleco,Sabonete,Atadura,Médico',
+  'Seringa,Medir a pressão,Estetoscópio,Soro na veia,Raio-X,Gesso,Muleta,Lavar as mãos,Plantão,Medir a temperatura,Nebulização,Dar banho no paciente,Pesar o paciente,Colírio,Comprimido,Xarope,Pronto-socorro,Consulta,Exame de sangue,Fisioterapia',
+  'Massagem cardíaca,Desfibrilador,Sutura,Teste de glicemia,Acesso venoso,Prontuário,Transfusão de sangue,Sondagem,Troca de plantão,Medicação na hora certa,Medir o pulso,Posição de recuperação,Banho no leito,Centro cirúrgico,Esterilizar material'],
+ festa:['🎉 Festas e passeios',
+  'Aniversário,Natal,Carnaval,Praia,Piscina,Cinema,Presente,Balão,Piquenique,Bolo de aniversário,Páscoa,Papai Noel,Fogos de artifício,Brinquedo,Parque,Sorveteria,Shopping,Zoológico,Fantasia,Vela',
+  'Casamento,Festa junina,Ano Novo,Churrasco,Amigo secreto,Formatura,Acampamento,Montanha-russa,Roda-gigante,Circo,Karaokê,Quadrilha,Fogueira,Pescaria,Pula-pula,Carrossel,Ovo de Páscoa,Árvore de Natal,Pinhata,Teatro',
+  'Chá de bebê,Pular sete ondas,Fila do banco,Engarrafamento,Selfie em grupo,Bolo na cara,Show de rock,Parque aquático,Viagem de avião,Dança das cadeiras,Trem fantasma,Casa mal-assombrada,Chá revelação,Bingo,Torta na cara'],
+ fantasia:['🧙 Personagens e fantasia',
+  'Bruxa,Fada,Pirata,Princesa,Rei,Rainha,Robô,Fantasma,Dragão,Sereia,Super-herói,Monstro,Dinossauro,Cavaleiro,Mágico,Unicórnio,Anjo,Zumbi,Vampiro,Palhaço',
+  'Múmia,Lobisomem,Saci,Curupira,Gênio da lâmpada,Duende,Ninja,Alienígena,Mula sem cabeça,Iara,Boitatá,Gigante,Bicho-papão,Coelhinho da Páscoa,Fada do dente,Espantalho,Caveira,Cavalo alado,Pirata perna de pau,Feiticeiro',
+  'Ciclope,Medusa,Centauro,Minotauro,Fênix,Kraken,Pé-grande,Homem invisível,Frankenstein,Cuca,Esfinge,Elfo,Hércules,Troll,Gárgula'],
+ transportes:['🚗 Transportes',
+  'Carro,Ônibus,Avião,Bicicleta,Moto,Trem,Barco,Caminhão,Helicóptero,Navio,Táxi,Metrô,Patinete,Skate,Ambulância,Viatura,Trator,Foguete,Lancha,Cavalo',
+  'Submarino,Balão de ar quente,Jet ski,Carroça,Teleférico,Caminhão de bombeiro,Escada rolante,Elevador,Canoa,Caiaque,Avião de papel,Kart,Carrinho de bebê,Carro de corrida,Ônibus escolar,Bonde,Prancha de surfe,Guindaste,Retroescavadeira,Motorhome',
+  'Asa-delta,Dirigível,Planador,Tuk-tuk,Trenó,Gôndola,Hovercraft,Carro conversível,Riquixá,Monociclo,Navio pirata,Ônibus de dois andares,Disco voador,Bondinho,Tirolesa'],
+ lugares:['📍 Lugares',
+  'Praia,Escola,Hospital,Igreja,Mercado,Parque,Casa,Shopping,Cinema,Zoológico,Fazenda,Piscina,Padaria,Farmácia,Restaurante,Banco,Rodoviária,Aeroporto,Biblioteca,Circo',
+  'Academia,Salão de beleza,Posto de gasolina,Estádio de futebol,Museu,Correios,Delegacia,Corpo de bombeiros,Lavanderia,Feira,Camping,Cachoeira,Montanha,Floresta,Deserto,Ilha,Caverna,Lago,Teatro,Hotel',
+  'Torre Eiffel,Cristo Redentor,Pirâmides,Polo Norte,Vulcão,Espaço sideral,Fundo do mar,Castelo,Labirinto,Farol,Estação espacial,Casa da árvore,Iglu,Navio de cruzeiro,Muralha da China'],
+ musica:['🎸 Música',
+  'Violão,Piano,Bateria,Flauta,Guitarra,Microfone,Tambor,Pandeiro,Apito,Cantar,Show,Sanfona,Fone de ouvido,Rádio,Palmas',
+  'Violino,Trompete,Saxofone,Teclado,Gaita,Cavaquinho,Berimbau,Xilofone,Chocalho,Triângulo,Karaokê,Maestro,DJ,Coral,Banda',
+  'Harpa,Contrabaixo,Tuba,Violoncelo,Trombone,Gaita de foles,Orquestra,Ópera,Batucada,Escola de samba,Fanfarra,Rap,Beatbox,Samba no pé,Forró'],
+ brincadeiras:['🪀 Brincadeiras',
+  'Pega-pega,Esconde-esconde,Amarelinha,Pular corda,Pipa,Boneca,Pião,Bolinha de sabão,Balanço,Escorregador,Gangorra,Massinha,Quebra-cabeça,Carrinho de controle,Cavalinho de pau',
+  'Estátua,Cabra-cega,Passa anel,Telefone sem fio,Morto-vivo,Queimada,Cabo de guerra,Bambolê,Ioiô,Bolinha de gude,Elástico,Dominó,Batata quente,Siga o mestre,Corrida de saco',
+  'Dança das cadeiras,Caça ao tesouro,Adoleta,Lenço atrás,Taco,Pebolim,Jogo da velha,Cama de gato,Pique-bandeira,Trava-língua,Ciranda,Batalha naval,Bilboquê,Ovo na colher,Mestre mandou'],
+ seguranca:['🦺 Segurança do trabalho',
+  'Capacete,Luva,Botina,Óculos de proteção,Extintor,Máscara,Cone,Placa de atenção,Lavar as mãos,Protetor solar,Colete refletivo,Saída de emergência,Kit de primeiros socorros,Alarme,Corrimão',
+  'Protetor auricular,Cinto de segurança,Andaime,Choque elétrico,Primeiros socorros,Ginástica laboral,Rota de fuga,Ponto de encontro,Alarme de incêndio,Escorregar no piso molhado,Brigada de incêndio,Faixa de pedestre,Hidrante,Escada de mão,Cinto paraquedista',
+  'Trabalho em altura,Cadeado de bloqueio,Levantar peso do jeito certo,Postura correta,Espaço confinado,Ficha de EPI,Inspeção de segurança,Mapa de risco,Diálogo de segurança,Treinamento de evacuação,Investigação de acidente,Permissão de trabalho'],
+ situacoes:['😜 Sentimentos e situações',
+  'Sono,Fome,Frio,Calor,Medo,Alegria,Tristeza,Susto,Cócegas,Dor de barriga,Raiva,Vergonha,Cansaço,Surpresa,Nojo',
+  'Saudade,Preguiça,Ciúmes,Wi-Fi caiu,Segunda-feira,Fofoca,Bateria fraca,Mosquito no ouvido,Soluço,Cheiro ruim,Chiclete no cabelo,Pé dormente,Sede no deserto,Ganhar na loteria,Perder o celular',
+  'Déjà vu,Spoiler,Sono na reunião,Pisar descalço no chão gelado,Esquecer o nome de alguém,Bater o dedinho na quina,Celular caindo na cara,Tropeçar e fingir que nada aconteceu,Nervoso antes da prova,Áudio de 5 minutos,Grupo da família no celular,Rir em hora errada,Mandar mensagem pra pessoa errada']
+};
+
+/* =================== QUIZ DA ESCOLA =================== */
+const SUBJ={mat:'➗ Matemática',pt:'📖 Português',cie:'🔬 Ciências',his:'🏛️ História',geo:'🌎 Geografia',ing:'🇺🇸 Inglês'};
+const QB=[
+['pt','f','Qual palavra está escrita certo?','Casa','Kasa','Caza','Cassa'],
+['pt','f','Qual é o plural de "flor"?','Flores','Flors','Florzes','Floris'],
+['pt','f','Quantas vogais tem o nosso alfabeto?','5','4','6','7'],
+['pt','f','Qual é o contrário de "alto"?','Baixo','Grande','Largo','Forte'],
+['pt','f','Qual palavra começa com a letra B?','Bola','Pato','Dado','Vaca'],
+['pt','f','Quantas letras tem a palavra "gato"?','4','3','5','6'],
+['pt','f','Qual é o contrário de "quente"?','Frio','Grande','Molhado','Alto'],
+['pt','f','Qual palavra rima com "pão"?','Mão','Pé','Bola','Casa'],
+['pt','m','Qual destas palavras é um verbo?','Correr','Bonito','Mesa','Rapidamente'],
+['pt','m','Qual é um sinônimo de "feliz"?','Contente','Triste','Cansado','Bravo'],
+['pt','m','Quantas sílabas tem "borboleta"?','4','3','5','2'],
+['pt','m','Qual é o aumentativo de "casa"?','Casarão','Casinha','Casebre','Caseiro'],
+['pt','m','Qual destas palavras é oxítona (sílaba forte no final)?','Café','Mesa','Lâmpada','Árvore'],
+['pt','m','Qual destas palavras é um adjetivo?','Bonito','Correr','Cadeira','Ontem'],
+['pt','m','Qual é o diminutivo de "pé"?','Pezinho','Pézão','Peito','Pequeno'],
+['pt','d','Em "O menino comeu o bolo", qual é o sujeito?','O menino','Comeu','O bolo','Comeu o bolo'],
+['pt','d','Qual destas palavras é proparoxítona?','Lâmpada','Café','Cadeira','Sofá'],
+['pt','d','Qual é a figura de linguagem em "Ela é uma flor"?','Metáfora','Hipérbole','Onomatopeia','Ironia'],
+['pt','d','"Morri de rir" é exemplo de qual figura de linguagem?','Hipérbole','Metáfora','Comparação','Antítese'],
+['pt','d','Quem escreveu "Dom Casmurro"?','Machado de Assis','José de Alencar','Monteiro Lobato','Cecília Meireles'],
+['pt','d','Quem criou o Sítio do Picapau Amarelo?','Monteiro Lobato','Machado de Assis','Ziraldo','Mauricio de Sousa'],
+['mat','f','Quantos lados tem um triângulo?','3','4','5','6'],
+['mat','f','Quantos minutos tem uma hora?','60','100','30','24'],
+['mat','f','Quantos dias tem uma semana?','7','5','10','30'],
+['mat','f','Quantos lados tem um quadrado?','4','3','5','6'],
+['mat','m','Quantos lados tem um hexágono?','6','5','8','7'],
+['mat','m','Quanto é a metade de 50?','25','20','30','15'],
+['mat','m','Quantos centímetros tem 1 metro?','100','10','1000','50'],
+['mat','m','Quantos meses tem um ano?','12','10','11','13'],
+['mat','d','Quanto vale a soma dos ângulos internos de um triângulo?','180°','90°','360°','270°'],
+['mat','d','Qual é a raiz quadrada de 81?','9','8','7','18'],
+['mat','d','Quanto é 3/4 de 100?','75','34','25','70'],
+['cie','f','Qual destes animais bota ovo?','Galinha','Cachorro','Gato','Vaca'],
+['cie','f','Do que as plantas precisam para viver?','Água, luz e ar','Só de terra','Só de sombra','De refrigerante'],
+['cie','f','Qual órgão usamos para respirar?','Pulmão','Estômago','Fígado','Rim'],
+['cie','f','Qual é o maior animal do mundo?','Baleia-azul','Elefante','Girafa','Tubarão-branco'],
+['cie','f','Quantas patas tem uma aranha?','8','6','4','10'],
+['cie','f','Com qual sentido sentimos o cheiro?','Olfato','Tato','Visão','Paladar'],
+['cie','m','Qual planeta é conhecido como planeta vermelho?','Marte','Júpiter','Vênus','Saturno'],
+['cie','m','O gelo é a água em qual estado físico?','Sólido','Líquido','Gasoso','Vapor'],
+['cie','m','Qual órgão bombeia o sangue pelo corpo?','Coração','Pulmão','Cérebro','Estômago'],
+['cie','m','Na fotossíntese, que gás a planta libera no ar?','Oxigênio','Gás carbônico','Nitrogênio','Fumaça'],
+['cie','m','Qual é o maior planeta do Sistema Solar?','Júpiter','Terra','Saturno','Marte'],
+['cie','m','Os animais que comem só plantas são chamados de…','Herbívoros','Carnívoros','Onívoros','Insetívoros'],
+['cie','d','Qual é a fórmula química da água?','H₂O','CO₂','O₂','NaCl'],
+['cie','d','Qual é a menor unidade viva dos seres vivos?','Célula','Átomo','Órgão','Tecido'],
+['cie','d','Quantos ossos tem o corpo humano adulto?','206','150','300','98'],
+['cie','d','Qual é a unidade de medida de força?','Newton','Watt','Volt','Metro'],
+['cie','d','Que gás as plantas absorvem do ar na fotossíntese?','Gás carbônico','Oxigênio','Hélio','Hidrogênio'],
+['his','f','Em que ano os portugueses chegaram ao Brasil?','1500','1822','1889','1922'],
+['his','f','Quem comandou a chegada dos portugueses ao Brasil em 1500?','Pedro Álvares Cabral','Dom Pedro I','Tiradentes','Cristóvão Colombo'],
+['his','f','Em que dia se comemora a Independência do Brasil?','7 de setembro','15 de novembro','21 de abril','25 de dezembro'],
+['his','m','Quem proclamou a Independência do Brasil?','Dom Pedro I','Dom Pedro II','Tiradentes','Getúlio Vargas'],
+['his','m','Qual lei acabou com a escravidão no Brasil em 1888?','Lei Áurea','Lei do Ventre Livre','Lei dos Sexagenários','Lei Eusébio de Queirós'],
+['his','m','Qual foi a primeira capital do Brasil?','Salvador','Rio de Janeiro','Brasília','São Paulo'],
+['his','m','Em que dia se comemora a Proclamação da República?','15 de novembro','7 de setembro','1º de maio','21 de abril'],
+['his','d','Em que ano Brasília foi inaugurada?','1960','1922','1889','1945'],
+['his','d','Qual civilização construiu as pirâmides de Gizé?','Egípcia','Romana','Grega','Maia'],
+['his','d','Quem é o mártir da Inconfidência Mineira?','Tiradentes','Zumbi dos Palmares','Dom Pedro I','Duque de Caxias'],
+['his','d','Em que ano começou a Segunda Guerra Mundial?','1939','1914','1945','1929'],
+['geo','f','Qual é a capital do Brasil?','Brasília','Rio de Janeiro','São Paulo','Salvador'],
+['geo','f','Qual é o maior oceano do mundo?','Pacífico','Atlântico','Índico','Ártico'],
+['geo','f','Em que direção o Sol nasce?','Leste','Oeste','Norte','Sul'],
+['geo','f','Em que país nós moramos?','Brasil','Portugal','Argentina','Chile'],
+['geo','m','Qual é o maior estado do Brasil em área?','Amazonas','Pará','Mato Grosso','Bahia'],
+['geo','m','Qual é o maior rio do Brasil em volume de água?','Rio Amazonas','Rio São Francisco','Rio Paraná','Rio Tietê'],
+['geo','m','Em quantas regiões o Brasil é dividido?','5','4','6','7'],
+['geo','m','Qual é a capital do Rio Grande do Sul?','Porto Alegre','Curitiba','Florianópolis','Pelotas'],
+['geo','m','Qual é a capital de Minas Gerais?','Belo Horizonte','Uberlândia','Ouro Preto','Juiz de Fora'],
+['geo','d','Qual é a capital do Japão?','Tóquio','Pequim','Seul','Osaka'],
+['geo','d','Qual é o bioma mais extenso do Brasil?','Amazônia','Cerrado','Pantanal','Caatinga'],
+['geo','d','Qual é o país mais populoso da América do Sul?','Brasil','Argentina','Colômbia','Peru'],
+['geo','d','A Linha do Equador divide a Terra em quais hemisférios?','Norte e Sul','Leste e Oeste','Oriental e Ocidental','Ártico e Antártico'],
+['ing','f','Como se diz "cachorro" em inglês?','Dog','Cat','Bird','Fish'],
+['ing','f','Que cor é "blue"?','Azul','Vermelho','Verde','Amarelo'],
+['ing','f','O que significa "hello"?','Olá','Tchau','Obrigado','Por favor'],
+['ing','f','Como se diz "três" em inglês?','Three','Tree','Two','Ten'],
+['ing','f','O que significa "cat"?','Gato','Carro','Cachorro','Casa'],
+['ing','m','O que significa "apple"?','Maçã','Abacaxi','Banana','Uva'],
+['ing','m','Como se diz "obrigado" em inglês?','Thank you','Please','Sorry','Welcome'],
+['ing','m','O que significa "school"?','Escola','Casa','Sapato','Igreja'],
+['ing','m','Que dia da semana é "Monday"?','Segunda-feira','Domingo','Sexta-feira','Terça-feira'],
+['ing','d','Complete: "She ___ a student."','is','are','am','be'],
+['ing','d','Qual é o passado de "go"?','Went','Goed','Gone','Going'],
+['ing','d','O que significa "kitchen"?','Cozinha','Frango','Quarto','Banheiro'],
+['ing','d','Qual é o plural de "child"?','Children','Childs','Childes','Childrens']
+];
+
+/* =================== VERDADE OU MENTIRA =================== */
+const VF=[
+['O Sol é uma estrela.',1,'O Sol é a estrela mais perto da Terra.'],
+['A aranha é um inseto.',0,'Aranha é aracnídeo: tem 8 patas. Insetos têm 6.'],
+['Os morcegos são aves.',0,'Morcegos são mamíferos que voam!'],
+['A água ferve a 100 °C ao nível do mar.',1,''],
+['O Brasil é o maior país da América do Sul.',1,''],
+['A baleia é um peixe.',0,'A baleia é um mamífero: respira ar e mama quando filhote.'],
+['O polvo tem 8 braços.',1,''],
+['A Lua tem luz própria.',0,'A Lua só reflete a luz do Sol.'],
+['O pinguim é uma ave.',1,'É uma ave que não voa, mas nada muito bem!'],
+['O tomate, para a biologia, é um fruto.',1,'Ele tem sementes, por isso é fruto.'],
+['A girafa é o animal mais alto do mundo.',1,''],
+['O Oceano Atlântico é o maior do mundo.',0,'O maior é o Pacífico.'],
+['O camaleão consegue mudar de cor.',1,''],
+['Os peixes respiram pelas brânquias.',1,''],
+['A Terra é o maior planeta do Sistema Solar.',0,'O maior é Júpiter.'],
+['O gelo boia na água.',1,'O gelo é menos denso que a água líquida.'],
+['A borboleta já foi uma lagarta.',1,''],
+['O Brasil foi campeão da Copa do Mundo de futebol masculino 5 vezes.',1,'1958, 1962, 1970, 1994 e 2002.'],
+['A tartaruga pode sair do casco.',0,'O casco faz parte do esqueleto dela.'],
+['O avestruz é a maior ave do mundo.',1,''],
+['O som é mais rápido que a luz.',0,'A luz é muito mais rápida. Por isso vemos o raio antes do trovão!'],
+['As plantas produzem oxigênio.',1,''],
+['Um triângulo tem 4 lados.',0,'Tem 3 lados.'],
+['O elefante é o maior animal terrestre.',1,''],
+['Dinossauros e humanos viveram na mesma época.',0,'Os dinossauros sumiram milhões de anos antes dos humanos.'],
+['O mel é feito pelas abelhas.',1,''],
+['Marte é chamado de planeta vermelho.',1,''],
+['O cavalo-marinho é um peixe.',1,'Parece estranho, mas é peixe!'],
+['A cenoura é uma raiz.',1,''],
+['A Antártida é o continente mais frio da Terra.',1,''],
+['Os golfinhos são mamíferos.',1,''],
+['O Monte Everest é a montanha mais alta do mundo.',1,''],
+['A cobra tem pernas.',0,''],
+['Um quilo de algodão pesa menos que um quilo de ferro.',0,'Os dois pesam 1 quilo!'],
+['O sangue é azul dentro do corpo.',0,'O sangue é sempre vermelho; as veias só parecem azuis.'],
+['Unhas e cabelos são feitos de queratina.',1,''],
+['O Japão fica na Europa.',0,'O Japão fica na Ásia.'],
+['Um formigueiro tem uma formiga rainha.',1,''],
+['A luz do Sol leva cerca de 8 minutos para chegar à Terra.',1,''],
+['O tubarão é um mamífero.',0,'O tubarão é um peixe.'],
+['O número 7 é par.',0,'7 é ímpar.'],
+['10 × 10 = 100.',1,''],
+['Metade de 30 é 15.',1,''],
+['O alfabeto da língua portuguesa tem 26 letras.',1,''],
+['O coração fica do lado direito do peito.',0,'Ele fica no centro, um pouco para a esquerda.'],
+['Os gatos têm bigodes que ajudam a sentir o ambiente.',1,''],
+['O Sol gira em volta da Terra.',0,'É a Terra que gira em volta do Sol.'],
+['Vulcões só existem no fundo do mar.',0,'Existem vulcões em terra também.'],
+['A capital do Brasil é o Rio de Janeiro.',0,'É Brasília (desde 1960).'],
+['Os ursos-polares vivem no Polo Norte.',1,''],
+['Os pinguins vivem no Polo Norte.',0,'Pinguins vivem no hemisfério Sul.'],
+['O arco-íris aparece quando a luz do Sol passa pela chuva.',1,''],
+['Os humanos têm 2 pulmões.',1,''],
+['A banana nasce embaixo da terra.',0,'Ela nasce em cachos na bananeira.'],
+['O ano bissexto tem 366 dias.',1,''],
+['O leite de vaca é verde.',0,''],
+['O Pantanal é um bioma brasileiro.',1,''],
+['Os sapos começam a vida como girinos.',1,''],
+['A Lua gira em volta da Terra.',1,''],
+['Os dentes de leite caem para nascerem os permanentes.',1,'']
+];
+
+/* =================== CHARADA DE EMOJI =================== */
+const EMO=[
+['🐝🍯','Mel'],['☀️🕶️🏖️','Praia'],['🎂🎈🎁','Aniversário'],['🎄🎅🎁','Natal'],['🍿🎬','Cinema'],['🌙⭐😴','Noite'],
+['🔥🚒','Bombeiro'],['🦷🪥','Escovar os dentes'],['💧❄️','Gelo'],['☁️⚡🌧️','Tempestade'],['🐄🥛','Leite'],['🌋🔥','Vulcão'],
+['🚀🌕','Viagem à Lua'],['🎃👻','Dia das Bruxas'],['🐟🎣','Pescaria'],['⚽🥅','Gol'],['🧊🐻‍❄️','Polo Norte'],['🌻☀️','Girassol'],
+['🎸🎤🤘','Show de rock'],['🧙‍♀️🧹','Bruxa'],['🧜‍♀️🌊','Sereia'],['❄️⛄','Boneco de neve'],['🐭🧀','Rato'],['📚✏️','Estudar'],
+['🛏️💤','Dormir'],['🌊🏄','Surfe'],['💍👰🤵','Casamento'],['🦷🧚','Fada do dente'],['🌽🔥🎉','Festa junina'],['🐰🥚🍫','Páscoa'],
+['🎆🥂','Ano Novo'],['🎭🥁💃','Carnaval'],['🔍🕵️','Detetive'],['🧑‍🚀🌌','Astronauta'],['🌧️☂️','Guarda-chuva'],['🍦☀️','Sorvete'],
+['🧀🍞🔥','Misto-quente'],['💡💭','Ideia'],['⏰😫','Acordar cedo'],['🎮👾','Videogame'],['🧳✈️','Viagem'],['🍂🌳','Outono'],
+['🌸🐝','Primavera'],['🦖🦴','Dinossauro'],['🐢🏁🐇','A lebre e a tartaruga'],['👸🍎😴','Branca de Neve'],['🧱🐷🐺','Os três porquinhos'],
+['👦🤥👃','Pinóquio'],['👠🎃🕛','Cinderela'],['🐺👵🧺','Chapeuzinho Vermelho'],['🏥🚑','Hospital'],['🍕🇮🇹','Pizza'],['🍳🥓☕','Café da manhã'],
+['🎪🤡','Circo'],['🐒🍌','Macaco'],['🌈🦄','Unicórnio'],['🏰👑','Castelo'],['🦁👑','Rei da selva'],['🧸🛏️','Hora de dormir'],
+['📱🔋😱','Bateria acabando'],['🚿🧼','Banho'],['🚗💨','Corrida'],['🎒🏫','Escola'],['🥶❄️','Frio'],['🥵☀️','Calor']
+];
+
+/* =================== STOP / BATATA =================== */
+const STOPCATS=['Nome','Animal','Fruta','Cor','Objeto','Comida','Cidade ou país','Profissão','Parte do corpo','Marca','Filme ou desenho','Esporte','Coisa da escola','Coisa da casa','Verbo','Brinquedo'];
+const LETTERS='ABCDEFGJLMNOPRSTUV'.split('');
+const BATATA=['Fale uma fruta 🍎','Fale um animal 🐾','Fale uma cor 🎨','Fale um nome de menina 👧','Fale um nome de menino 👦','Fale algo que tem na cozinha 🍳','Fale um animal que voa 🦅','Fale algo gelado 🧊','Fale algo quente 🔥','Fale uma profissão 👷','Fale um esporte ⚽','Fale algo da escola ✏️','Fale uma comida 🍝','Fale um país 🌎','Fale uma cidade 🏙️','Fale algo redondo ⚪','Fale algo que tem no banheiro 🚿','Fale um meio de transporte 🚗','Fale um doce 🍬','Fale uma parte do corpo 💪','Fale um instrumento musical 🎸','Fale algo verde 🟢','Fale algo vermelho 🔴','Fale um personagem de desenho 📺','Fale uma bebida 🥤','Fale um bicho do mar 🐙','Fale algo que tem rodas 🛞','Fale um brinquedo 🧸','Fale uma palavra com A 🅰️','Fale uma palavra com M','Fale uma palavra com P','Fale um verbo 🏃','Fale algo da praia 🏖️','Fale algo do Natal 🎄','Fale uma flor 🌸','Fale algo que faz barulho 🔊','Fale algo macio ☁️','Fale um legume 🥕','Fale algo que tem em hospital 🏥','Fale um EPI 🦺'];
+
+/* =================== BASE =================== */
+const CATS={};for(const k in RAW){const r=RAW[k];CATS[k]={n:r[0],f:r[1].split(','),m:r[2].split(','),d:r[3].split(',')};}
+const CK=Object.keys(CATS);
+const LVL={f:'😊 Fácil',m:'😎 Médio',d:'🤯 Difícil'};
+const AVATARS=['🦊','🐸','🦁','🐼','🐙','🦄','🐔','🐵','🐯','🐧','🦖','🐷','👽','🤖','🦈','🐝','🐨','🐶','🐱','🦋','🐢','🦉','🐮','🍕','👑','🤠','🥷','🧚','🦸','🧙'];
+const COLORS=['#3b82f6','#ef4444','#22c55e','#f59e0b','#a855f7','#ec4899','#14b8a6','#f97316','#84cc16','#06b6d4','#e11d48','#8b5cf6'];
+const TEAMS=[{n:'Raposas Ninjas',a:'🦊'},{n:'Sapos Dançantes',a:'🐸'},{n:'Leões Famintos',a:'🦁'},{n:'Pandas Preguiçosos',a:'🐼'},{n:'Polvos Malucos',a:'🐙'},{n:'Unicórnios Turbo',a:'🦄'}];
+const TNAMES=['Raposas Ninjas','Sapos Dançantes','Leões Famintos','Pandas Preguiçosos','Polvos Malucos','Unicórnios Turbo','Tubarões Risonhos','Pinguins Radicais','Abelhas Elétricas','Dinos do Barulho','Corujas Espertas','Macacos Doidos'];
+const TWISTS=['🐢 em câmera lenta','🦩 num pé só','🤖 como um robô','🙈 de olhos fechados','💃 dançando','🚫 sem usar as mãos','🐒 fazendo careta','⚡ bem rápido','👵 como um vovô','🥶 tremendo de frio','😭 chorando','🤫 só com o rosto'];
+const REACT=['😂','👏','🔥','😱','🤔','😡','🥳','💩'];
+const GAMES={
+ mimica:{e:'🎭',n:'Mímica',d:'Imite sem falar! O time adivinha',c:'#db2777',kind:'turn',team:'both',min:2,local:1},
+ desenho:{e:'🎨',n:'Desenha e Adivinha',d:'Desenhe no celular e o time adivinha',c:'#7c3aed',kind:'turn',team:'both',min:2,local:1},
+ quemsou:{e:'🤔',n:'Quem Sou Eu?',d:'Descubra a palavra com perguntas de sim ou não',c:'#16a34a',kind:'turn',team:'both',min:2,local:1},
+ quiz:{e:'🧠',n:'Quiz da Escola',d:'Matemática, português, ciências e mais',c:'#2563eb',kind:'quiz',team:'both',min:1,local:1},
+ vf:{e:'✅',n:'Verdade ou Mentira',d:'Será que é verdade? Responda rápido!',c:'#0891b2',kind:'quiz',team:'both',min:1,local:1},
+ emoji:{e:'😎',n:'Charada de Emoji',d:'Descubra o que os emojis querem dizer',c:'#ea580c',kind:'quiz',team:'both',min:1,local:1},
+ impostor:{e:'🕵️',n:'Quem é o Impostor?',d:'Todos sabem a palavra… menos um!',c:'#b45309',kind:'imp',team:'solo',min:3,local:1},
+ stop:{e:'✋',n:'Stop (Adedonha)',d:'Uma letra, várias categorias… STOP!',c:'#dc2626',kind:'stop',team:'both',min:2,local:0},
+ batata:{e:'💣',n:'Batata Quente',d:'Responda e passe antes que exploda!',c:'#e11d48',kind:'bomb',team:'both',min:2,local:1}
+};
+const GK=Object.keys(GAMES);
+const HELP={
+ mimica:{steps:['Na vez da sua equipe, um jogador é o <b>mímico</b>. Só ele vê a palavra (segurando o dedo no cartão).','O mímico imita <b>sem falar, sem apontar e sem fazer som</b>. O time grita os palpites.','Acertou? O mímico aperta <b>ACERTOU</b>: ganha ponto e a vez passa pra <b>próxima equipe</b>.','Se o tempo acabar, ninguém pontua e passa a vez. A palavra de uma equipe <b>nunca aparece</b> no celular das outras.','Vence quem chegar primeiro na meta de pontos!'],tips:'🌀 Modo Maluco: algumas palavras pedem para imitar "em câmera lenta", "num pé só"… ⭐ Palavra de Ouro vale 2 pontos!'},
+ desenho:{steps:['Na sua vez, você é o <b>desenhista</b>. Só você vê a palavra.','Desenhe no celular! <b>Não vale escrever letras nem números.</b>','Seu time olha o desenho (na sala online ele aparece ao vivo em todos os celulares!) e tenta adivinhar.','Acertou? Aperte <b>ACERTOU</b>: ponto pro time e a vez passa pra próxima equipe.','Vence quem chegar primeiro na meta de pontos!'],tips:'Use as cores e a borracha. Comece pelo formato geral e depois os detalhes!'},
+ quemsou:{steps:['Na sua vez, você é quem <b>adivinha</b>. Só os OUTROS veem a palavra.','Faça perguntas de <b>SIM ou NÃO</b>: "É um animal?", "Cabe na mão?", "Tem em casa?"','Os outros respondem só <b>sim, não ou talvez</b> (na sala online dá pra responder pelos botões!).','Acertou? Alguém aperta <b>ACERTOU</b>: ponto e passa a vez.','Num celular só: segure o celular na testa com a tela virada pros outros!'],tips:'Comece com perguntas gerais (é vivo? é comida?) e depois vá fechando.'},
+ quiz:{steps:['Aparece uma pergunta com <b>4 respostas</b> coloridas.','Toque na certa antes do tempo acabar.','Na sala online todo mundo responde junto: quem acerta <b>mais rápido</b> ganha mais pontos, e acertos seguidos dão <b>bônus de sequência 🔥</b>.','Em equipes, a equipe ganha os pontos do seu melhor jogador em cada pergunta.'],tips:'As contas de matemática são criadas na hora: dá pra jogar mil vezes!'},
+ vf:{steps:['Aparece uma frase.','Você decide: é <b>VERDADE</b> ou <b>MENTIRA</b>?','Quem acerta mais rápido ganha mais pontos.','Depois de cada resposta aparece uma curiosidade explicando! 🤓'],tips:'Cuidado com as pegadinhas! 😏'},
+ emoji:{steps:['Aparecem alguns <b>emojis</b>.','Eles formam uma palavra, um lugar, uma festa ou uma história.','Escolha a resposta certa entre as 4 opções.','Quem acerta mais rápido ganha mais pontos!'],tips:'Leia os emojis como se fosse uma frase. 🐝 + 🍯 = Mel!'},
+ impostor:{steps:['Precisa de pelo menos <b>3 pessoas</b>.','Cada um vê sua carta em segredo. Todos recebem a mesma palavra… menos o <b>IMPOSTOR</b>!','Na ordem que o jogo mostrar, cada um fala <b>UMA palavra</b> que lembre o segredo, sem entregar. Façam 2 voltas.','Votem em quem acham que é o impostor. Pegaram? Todos ganham 1 ponto. Ele escapou? Ganha 2!'],tips:'🤫 Modo Impostor Secreto: o impostor recebe uma palavra PARECIDA e nem sabe que é o impostor!'},
+ stop:{steps:['O jogo sorteia uma <b>LETRA</b>.','Preencha cada categoria com uma palavra que comece com essa letra (Nome, Animal, Fruta…).','Quem completar tudo aperta <b>STOP!</b> e todo mundo para.','Resposta única vale <b>10</b>, repetida vale <b>5</b>, e se só você respondeu a categoria vale <b>20</b>! O anfitrião pode anular respostas erradas.'],tips:'Só funciona na sala online (cada um escreve no seu celular).'},
+ batata:{steps:['A bomba 💣 começa com alguém.','Quem está com ela tem que <b>falar uma resposta</b> pro tema (ex.: "Fale uma fruta") e passar a bomba.','Não vale repetir o que os outros já falaram!','A bomba explode numa hora surpresa 💥. Quem estiver com ela perde: <b>todos os outros ganham 1 ponto</b>.'],tips:'Num celular só, passe o próprio celular de mão em mão! Na sala online, a bomba pula de celular em celular.'}
+};
+
+/* =================== UTIL =================== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null}}
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+
+let USED=new Set(ls('fej_used')||[]);
+function saveUsed(){ls('fej_used',[...USED].slice(-4000));}
+function takeFrom(pool,keyf){let fresh=pool.filter(x=>!USED.has(keyf(x)));if(!fresh.length){pool.forEach(x=>USED.delete(keyf(x)));fresh=pool;}const x=pick(fresh);USED.add(keyf(x));saveUsed();return x;}
+function drawWord(cats,lvl,avoid){
+  let pool=[];cats.forEach(c=>CATS[c]&&CATS[c][lvl].forEach(w=>pool.push({c,w})));
+  if(!pool.length)CATS.animais[lvl].forEach(w=>pool.push({c:'animais',w}));
+  if(avoid)pool=pool.filter(x=>x.w!==avoid);
+  const x=takeFrom(pool,x=>x.c+'|'+x.w);return{c:CATS[x.c].n,k:x.c,w:x.w};
+}
+function mathQ(l){
+  let t,a;
+  for(let k=0;k<30;k++){
+    if(l==='f'){const x=ri(1,15),y=ri(1,10);if(Math.random()<.5){t=`Quanto é ${x} + ${y}?`;a=x+y}else{const b=Math.max(x,y),s=Math.min(x,y);t=`Quanto é ${b} − ${s}?`;a=b-s}}
+    else if(l==='m'){const x=ri(2,10),y=ri(2,10);if(Math.random()<.6){t=`Quanto é ${x} × ${y}?`;a=x*y}else{t=`Quanto é ${x*y} ÷ ${x}?`;a=y}}
+    else{const r=Math.random();
+      if(r<.3){const x=ri(2,20),c=ri(1,20);t=`Se x + ${c} = ${x+c}, quanto vale x?`;a=x}
+      else if(r<.55){const x=ri(2,9),c=ri(2,9);t=`Se ${c}x = ${c*x}, quanto vale x?`;a=x}
+      else if(r<.8){const p=pick([10,20,25,50]),b=pick([40,60,80,100,120,200,300,400]);t=`Quanto é ${p}% de ${b}?`;a=b*p/100}
+      else{const x=ri(2,13);t=`Quanto é ${x}² (${x} ao quadrado)?`;a=x*x}}
+    if(!USED.has('Q|'+t))break;
+  }
+  USED.add('Q|'+t);saveUsed();
+  const set=new Set([a]);let g=0;while(set.size<4&&g++<100){const d=a+pick([-3,-2,-1,1,2,3,5,-5,10]);if(d>=0)set.add(d)}
+  let n=a+11;while(set.size<4)set.add(n++);
+  const o=shuffle([...set]).map(String);return{s:SUBJ.mat,t,o,ok:o.indexOf(String(a))};
+}
+function drawQ(subj,lvl){
+  if(!subj||!subj.length)subj=['mat'];
+  if(subj.includes('mat')&&Math.random()<(1/subj.length)*0.7)return mathQ(lvl);
+  const all=QB.filter(q=>subj.includes(q[0])&&q[1]===lvl);
+  if(!all.length)return mathQ(lvl);
+  const q=takeFrom(all,q=>'Q|'+q[2]);
+  const o=shuffle([q[3],q[4],q[5],q[6]]);return{s:SUBJ[q[0]],t:q[2],o,ok:o.indexOf(q[3])};
+}
+function drawVF(){const q=takeFrom(VF,q=>'V|'+q[0]);return{s:'✅ Verdade ou Mentira',t:q[0],o:['✅ VERDADE','❌ MENTIRA'],ok:q[1]?0:1,x:q[2]||''};}
+function drawEmoji(){const q=takeFrom(EMO,q=>'E|'+q[0]);const wrong=shuffle(EMO.filter(e=>e[1]!==q[1])).slice(0,3).map(e=>e[1]);const o=shuffle([q[1],...wrong]);return{s:'😎 Charada de Emoji',t:q[0],o,ok:o.indexOf(q[1]),em:1};}
+function drawAny(g,c){return g==='vf'?drawVF():g==='emoji'?drawEmoji():drawQ(c.subj,c.lvl);}
+
+/* =================== EFEITOS =================== */
+let ac=null;
+function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();}catch(e){}}
+function beep(f,d,type,vol){try{if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'triangle';o.frequency.value=f;g.gain.setValueAtTime(vol||.25,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
+function noise(d){try{if(!ac)return;const b=ac.createBuffer(1,ac.sampleRate*d,ac.sampleRate),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*(1-i/x.length);const s=ac.createBufferSource();s.buffer=b;const g=ac.createGain();g.gain.value=.5;s.connect(g).connect(ac.destination);s.start();}catch(e){}}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function tap(){beep(900,.04)}
+function flashC(c){const f=$('flash');f.style.background=c;f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}
+function showStreak(t){const s=$('streak');s.textContent=t;s.classList.remove('go');void s.offsetWidth;s.classList.add('go');}
+function fanfare(){[523,659,784,1046,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.22),i*150));}
+const SFX={
+ start:()=>{beep(988,.25);buzz(100)},
+ hit:()=>{flashC('#22c55e');beep(1046,.1);setTimeout(()=>beep(1318,.14),90);buzz(50);confetti(40);showStreak(pick(['ACERTOU! 🎉','BOA! 👏','ISSO AÍ! 🙌','GÊNIOS! 🧠']))},
+ gold:()=>{flashC('#fbbf24');showStreak('⭐ +2 PONTOS! ⭐');confetti(80);fanfare()},
+ skip:()=>{beep(220,.15);buzz(20)},
+ end:()=>{flashC('#ef4444');beep(196,.5);setTimeout(()=>beep(147,.6),250);buzz([200,80,200])},
+ good:()=>{flashC('#22c55e');confetti(70);beep(1046,.1);setTimeout(()=>beep(1318,.2),100);buzz(60)},
+ bad:()=>{flashC('#ef4444');beep(160,.4,'sawtooth');buzz([60,40,60])},
+ pass:()=>{beep(600,.06);setTimeout(()=>beep(900,.06),60);buzz(30)},
+ boom:()=>{flashC('#f97316');noise(.9);beep(80,.6,'sawtooth',.4);buzz([400,100,400]);showStreak('💥 BUM! 💥')},
+ stop:()=>{flashC('#ef4444');beep(330,.15,'square');setTimeout(()=>beep(220,.4,'square'),150);buzz([100,50,100]);showStreak('✋ STOP!')},
+ final:()=>{fanfare();confetti(220);setTimeout(()=>confetti(160),900)}
+};
+const cv=$('conf'),cx=cv.getContext('2d');let parts=[],cRaf=0;
+function sizeC(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;}addEventListener('resize',sizeC);sizeC();
+function confetti(n){const cols=['#f472b6','#fbbf24','#34d399','#60a5fa','#a78bfa','#f87171'];const W=cv.width,H=cv.height;
+  for(let i=0;i<n;i++)parts.push({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*W*.03,vy:-Math.random()*H*.025-H*.005,s:(6+Math.random()*8)*devicePixelRatio,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:pick(cols),life:0});
+  if(!cRaf)cLoop();}
+function cLoop(){cx.clearRect(0,0,cv.width,cv.height);const H=cv.height;parts=parts.filter(p=>p.y<H+40&&p.life<400);
+  parts.forEach(p=>{p.vy+=H*.0006;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life++;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore();});
+  cRaf=parts.length?requestAnimationFrame(cLoop):0;if(!cRaf)cx.clearRect(0,0,cv.width,cv.height);}
+let wl=null;async function wake(){try{if('wakeLock'in navigator&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>wl=null);}}catch(e){}}
+function floater(e,name,txt){const d=document.createElement('div');d.className='floater'+(txt?' txt':'');d.style.left=(10+Math.random()*70)+'%';d.style.bottom=(12+Math.random()*12)+'%';
+  d.innerHTML=esc(e)+(name?`<small>${esc(name)}</small>`:'');document.body.appendChild(d);setTimeout(()=>d.remove(),2700);}
+
+/* segurar para ver / segurar para confirmar */
+document.addEventListener('pointerdown',e=>{const p=e.target.closest('.peek');if(p){p.classList.add('show');buzz(15);}
+  const h=e.target.closest('.hold');if(h&&!h.disabled){audio();h.classList.add('holding');clearTimeout(h._t);h._t=setTimeout(()=>{h.classList.remove('holding');buzz(40);const fn=window[h.dataset.fn];fn&&fn();},800);}});
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{document.querySelectorAll('.peek.show').forEach(p=>p.classList.remove('show'));document.querySelectorAll('.hold.holding').forEach(h=>{h.classList.remove('holding');clearTimeout(h._t);});}));
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.peek,.hold,.cvwrap'))e.preventDefault();});
+const PEEK=(inner,cls='',label='SEGURE para ver')=>`<div class="wcard peek ${cls}"><div class="cover"><div class="ic">👆</div>${label}<small>solte para esconder</small></div><div class="inner">${inner}</div></div>`;
+const HOLD=(fn,label,cls='btn-ok')=>`<button class="hold ${cls}" data-fn="${fn}"><div class="fill"></div><span>✋ ${label}</span></button>`;
+
+/* =================== RENDER =================== */
+const UI={s:'home',lastS:'',lastHtml:''};
+let PROF=ls('fej_prof')||{n:'',a:pick(AVATARS)};
+function go(s){UI.s=s;closeOv();render();}
+function render(){
+  if(UI.s==='on'&&G&&G.ph==='stp'){const f=$('stopform');if(f&&f.dataset.k===stopKey()){stopLive();paintTimer();return;}}
+  const f=SCR[UI.s]||SCR.home;const html=f();
+  const v=$('view');
+  if(html!==UI.lastHtml||UI.s!==UI.lastS){
+    const sc0=v.querySelector('.scroll');const keep=UI.s===UI.lastS&&sc0?sc0.scrollTop:0;
+    v.innerHTML=html;UI.lastHtml=html;
+    if(UI.s!==UI.lastS||UI.forceAnim){v.classList.remove('anim');void v.offsetWidth;v.classList.add('anim');UI.forceAnim=false;}
+    else{const sc=v.querySelector('.scroll');if(sc&&keep)sc.scrollTop=keep;}
+    UI.lastS=UI.s;
+  }
+  stripe();paintTimer();cvHook();
+}
+function stripe(){const s=$('stripe');let c='';
+  if(UI.s==='on'&&G&&G.T&&NET.me){const me=pBy(NET.me);if(me&&me.t!=null&&G.T[me.t])c=COLORS[me.t];}
+  s.style.background=c||'transparent';}
+function openHelp(g){
+  const list=g?[g]:GK;
+  $('sheet').innerHTML=list.map(k=>`<div style="margin-bottom:16px"><div class="row"><div style="font-size:46px">${GAMES[k].e}</div><div class="h2" style="text-align:left;margin:0">${GAMES[k].n}</div></div>
+   ${HELP[k].steps.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${s}</div></div>`).join('')}<div class="tipbox">💡 ${HELP[k].tips}</div></div>`).join('')+
+   `<button class="wide btn-ok" onclick="closeOv()">ENTENDI! 👍</button>`;
+  $('ov').classList.add('on');$('sheet').scrollTop=0;
+}
+function closeOv(){$('ov').classList.remove('on');}
+function rulesHTML(g){return `<div class="rules"><div class="row" style="margin-bottom:4px"><div style="font-size:40px">${GAMES[g].e}</div><div class="h2" style="text-align:left;margin:0;font-size:28px">${GAMES[g].n}</div></div>
+  ${HELP[g].steps.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${s}</div></div>`).join('')}<div class="tipbox">💡 ${HELP[g].tips}</div></div>`;}
+
+function boardHTML(list,cur){return `<div class="board">${list.map((t,i)=>`<div class="sc ${i===cur?'cur':''}" style="background:${t.col||COLORS[i%12]}55;${i===cur?'border-color:'+(t.col||COLORS[i%12]):''}"><div class="e">${esc(t.a)}</div><div class="n">${esc(t.n)}</div><div class="p">${t.s}</div></div>`).join('')}</div>`;}
+function ringHTML(){return `<div class="ring" id="ring"><svg width="86" height="86"><circle cx="43" cy="43" r="37" stroke="rgba(255,255,255,.18)" stroke-width="9" fill="none"/><circle id="arc" cx="43" cy="43" r="37" stroke="#34d399" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="232.5" stroke-dashoffset="0"/></svg><b id="tnum"></b></div>`;}
+function podiumHTML(list){
+  const order=list.map((x,i)=>({...x,i})).sort((a,b)=>b.s-a.s);
+  const pos=[1,0,2].filter(k=>k<order.length);const H=[190,145,105],M=['🥇','🥈','🥉'];
+  const titles=['👑 Campeões!','🎬 Quase lá!','🤡 Divertidos demais','😴 Precisam treinar mais'];
+  return `<div class="podium">${pos.map((k,j)=>{const o=order[k];return `<div class="pod"><div class="e">${esc(o.a)}</div><div class="n">${esc(o.n)}</div><div class="b" style="height:${H[k]-60}px;background:${o.col||COLORS[o.i%12]};animation-delay:${j*.2}s">${M[k]}</div></div>`}).join('')}</div>
+  <div class="list">${order.map((o,k)=>`<div class="li"><span>${k+1}º ${esc(o.a)} ${esc(o.n)}<br><span class="small">${k===0?titles[0]:k===order.length-1?titles[3]:titles[Math.min(k,2)]}</span></span><span class="tag" style="background:${o.col||COLORS[o.i%12]};font-size:18px">${o.s} pts</span></div>`).join('')}</div>`;
+}
+function winnerMsg(list){if(!list.length)return '';const max=Math.max(...list.map(x=>x.s));const w=list.filter(x=>x.s===max);
+  return w.length>1?'😱 <b>EMPATE!</b> Vai ter que ter revanche!':`${esc(w[0].a)} <b>${esc(w[0].n)}</b> venceu! 👑`;}
+function wordInner(x){return `${x.g?'<div class="badge">⭐ VALE 2</div>':''}<div class="cat">${esc(x.c)}</div><div class="word">${esc(x.w)}</div>${x.tw?`<div class="twist">${x.tw}</div>`:''}`;}
+function optsHTML(q,state,fn){const two=q.o.length===2;return `<div class="opts" ${two?'style="grid-template-columns:1fr"':''}>${q.o.map((o,i)=>{let cls='';if(state){if(i===state.ok)cls='right';else if(i===state.ch)cls='wrong';else cls='dim';}
+  return `<button class="opt o${two?(i?0:3):i} ${cls}" ${state?'':`onclick="${fn}(${i})"`} ${two?'style="min-height:90px;font-size:26px"':''}>${two?'':['▲','◆','●','■'][i]+' '}${esc(o)}</button>`;}).join('')}</div>`;}
+function qHead(q){return q.em?`<div class="emojiq">${esc(q.t)}</div>`:`<div class="qtext">${esc(q.t)}</div>`;}
+function waitHost(t){return `<div class="wait"><span class="dots"><span>•</span><span>•</span><span>•</span></span> ${t||'Esperando o anfitrião'}</div>`;}
+function gameCards(sel,fn,localOnly){return `<div class="gamegrid">${GK.map(k=>{const g=GAMES[k];const dis=localOnly&&!g.local;return `<button class="gcard ${sel===k?'sel':''}" ${dis?'disabled':''} onclick="${fn}('${k}')"><span class="q" onclick="event.stopPropagation();openHelp('${k}')">❓</span>${dis?'<span class="badge2">só online</span>':''}<div class="ge" style="background:${g.c}">${g.e}</div><b>${g.n}</b><span>${g.d}</span></button>`}).join('')}</div>`;}
+
+/* =================== CONFIGURAÇÕES =================== */
+const DEF={
+ turn:g=>({lvl:'f',cats:g==='mimica'?['animais','profissoes','acoes','objetos','casa','comidas','esportes','fantasia']:['animais','profissoes','objetos','comidas','casa','transportes','lugares'],time:60,meta:5,skips:2,crazy:true,gold:true}),
+ quiz:g=>({lvl:'f',subj:['mat','pt','cie','his','geo','ing'],n:10,time:g==='vf'?12:20}),
+ imp:()=>({lvl:'f',cats:['animais','objetos','comidas','casa','profissoes','lugares'],hint:true,secret:false}),
+ stop:()=>({sc:['Nome','Animal','Fruta','Cor','Objeto','Cidade ou país'],rounds:3,time:120}),
+ bomb:()=>({rounds:5,fuse:'m'})
+};
+function defCfg(g){return DEF[GAMES[g].kind](g);}
+function chipRow(key,vals,cur,label){return `<div class="chips">${vals.map(v=>`<button class="chip ${v===cur?'sel':''}" onclick="cfgSet('${key}',${typeof v==='string'?"'"+v+"'":v})">${label?label(v):v}</button>`).join('')}</div>`;}
+function tog(key,val,title,sub){return `<div class="card toggle"><div><h3 style="margin:0">${title}</h3><div class="small">${sub}</div></div><button class="sw ${val?'on':''}" onclick="cfgSet('${key}',${!val})"></button></div>`;}
+function catsHTML(c){const all=CK.every(k=>c.cats.includes(k));
+  return `<div class="card"><h3>🗂 CATEGORIAS <span class="small">(${c.cats.length} escolhidas)</span></h3><div class="chips"><button class="chip mix ${all?'sel':''}" onclick="cfgMix()">🌀 Mistura tudo</button>${CK.map(k=>`<button class="chip ${c.cats.includes(k)?'sel':''}" onclick="cfgCat('${k}')">${CATS[k].n}</button>`).join('')}</div></div>`;}
+function settingsHTML(g,c){
+  const k=GAMES[g].kind;let h='';
+  if(k==='turn'){
+    h+=`<div class="card"><h3>🎚️ NÍVEL DAS PALAVRAS</h3>${chipRow('lvl',['f','m','d'],c.lvl,v=>LVL[v])}</div>`+catsHTML(c);
+    h+=`<div class="card"><h3>🏁 META: VENCE QUEM FIZER</h3>${chipRow('meta',[3,5,8,10,15],c.meta,v=>v+' pts')}</div>`;
+    h+=`<div class="card"><h3>⏱ TEMPO POR PALAVRA</h3>${chipRow('time',[30,45,60,90,120],c.time,v=>v+'s')}</div>`;
+    h+=`<div class="card"><h3>⏭ PULOS POR VEZ</h3>${chipRow('skips',[0,1,2,3,99],c.skips,v=>v===99?'Livre':v)}</div>`;
+    if(g==='mimica')h+=tog('crazy',c.crazy,'🌀 MODO MALUCO','Desafios extras: câmera lenta, num pé só…');
+    h+=tog('gold',c.gold,'⭐ PALAVRA DE OURO','Às vezes vale 2 pontos!');
+  }else if(k==='quiz'){
+    if(g==='quiz'){h+=`<div class="card"><h3>🎚️ NÍVEL</h3>${chipRow('lvl',['f','m','d'],c.lvl,v=>LVL[v])}</div>`;
+      h+=`<div class="card"><h3>📚 MATÉRIAS</h3><div class="chips">${Object.keys(SUBJ).map(s=>`<button class="chip ${c.subj.includes(s)?'sel':''}" onclick="cfgSubj('${s}')">${SUBJ[s]}</button>`).join('')}</div></div>`;}
+    h+=`<div class="card"><h3>❓ QUANTAS PERGUNTAS</h3>${chipRow('n',[5,10,15,20],c.n)}</div>`;
+    h+=`<div class="card"><h3>⏱ TEMPO PARA RESPONDER</h3>${chipRow('time',[8,12,15,20,30],c.time,v=>v+'s')}</div>`;
+  }else if(k==='imp'){
+    h+=`<div class="card"><h3>🎚️ NÍVEL DAS PALAVRAS</h3>${chipRow('lvl',['f','m','d'],c.lvl,v=>LVL[v])}</div>`+catsHTML(c);
+    h+=tog('hint',c.hint,'💡 DICA PRO IMPOSTOR','O impostor vê a categoria (mais fácil pra ele).');
+    h+=tog('secret',c.secret,'🤫 IMPOSTOR SECRETO','O impostor recebe uma palavra parecida e nem sabe que é ele!');
+  }else if(k==='stop'){
+    h+=`<div class="card"><h3>📝 CATEGORIAS <span class="small">(${c.sc.length} de no máx. 8)</span></h3><div class="chips">${STOPCATS.map(s=>`<button class="chip ${c.sc.includes(s)?'sel':''}" onclick="cfgStop('${s}')">${s}</button>`).join('')}</div></div>`;
+    h+=`<div class="card"><h3>🔁 RODADAS</h3>${chipRow('rounds',[1,2,3,4,5],c.rounds)}</div>`;
+    h+=`<div class="card"><h3>⏱ TEMPO MÁXIMO</h3>${chipRow('time',[60,90,120,180],c.time,v=>v+'s')}</div>`;
+  }else if(k==='bomb'){
+    h+=`<div class="card"><h3>💥 QUANTAS EXPLOSÕES</h3>${chipRow('rounds',[3,5,8,10],c.rounds)}</div>`;
+    h+=`<div class="card"><h3>🧨 PAVIO</h3>${chipRow('fuse',['s','m','l'],c.fuse,v=>({s:'⚡ Curto',m:'🔥 Médio',l:'🐢 Longo'})[v])}</div>`;
+  }
+  return h;
+}
+function cfgObj(){return UI.s==='hostSetup'?HS.cfg:UI.s==='on'?G.cfg:LOC.cfg;}
+function cfgDone(){tap();if(UI.s==='on'&&NET.host){HC[G.g]=G.cfg;pub();}else render();}
+function cfgSet(k,v){cfgObj()[k]=v;cfgDone();}
+function cfgCat(k){const c=cfgObj();if(c.cats.includes(k)){if(c.cats.length>1)c.cats=c.cats.filter(x=>x!==k);}else c.cats.push(k);cfgDone();}
+function cfgMix(){const c=cfgObj();c.cats=CK.every(k=>c.cats.includes(k))?['animais','objetos','comidas']:CK.slice();cfgDone();}
+function cfgSubj(k){const c=cfgObj();if(c.subj.includes(k)){if(c.subj.length>1)c.subj=c.subj.filter(x=>x!==k);}else c.subj.push(k);cfgDone();}
+function cfgStop(s){const c=cfgObj();if(c.sc.includes(s)){if(c.sc.length>3)c.sc=c.sc.filter(x=>x!==s);}else if(c.sc.length<8)c.sc.push(s);cfgDone();}
+
+/* =================== TELAS GERAIS =================== */
+const SCR={};
+SCR.home=()=>`
+ <div class="spacer"></div>
+ <div class="bigemoji">🎲</div>
+ <h1 class="title"><span class="wob">FAMÍLIA</span><br>EM JOGO</h1>
+ <p class="sub">9 jogos pra rir junto! 🤪</p>
+ <div class="row" style="justify-content:center;gap:4px;font-size:28px;margin:4px 0;flex-wrap:wrap">${GK.map(k=>GAMES[k].e).join(' ')}</div>
+ <div class="spacer"></div>
+ <button class="wide btn-ok" onclick="UI.next='create';go('prof')">🌐 Criar sala online</button>
+ <button class="wide btn-blue" onclick="UI.next='join';go('prof')">🔑 Entrar numa sala</button>
+ <button class="wide btn-pink" onclick="go('localPick')">📱 Jogar num celular só</button>
+ <button class="ghost" style="margin:12px auto 0;display:block" onclick="openHelp()">❓ Como jogar cada jogo</button>`;
+SCR.localPick=()=>`
+ <div class="topbar"><button class="ghost" onclick="go('home')">← Voltar</button><span class="pill">📱 Um celular só</span></div>
+ <div class="h2">Escolha o jogo</div>
+ <div class="scroll">${gameCards('','localSetup',true)}
+ <p class="sub small" style="margin-top:12px">No celular só, o aparelho passa de mão em mão. As telas secretas só aparecem quando você <b>segura o dedo</b>, então ninguém vê sem querer! 😉</p></div>`;
+
+/* =================== LOCAL =================== */
+let LOC={g:null,cfg:null,people:[],team:true};
+function localSetup(g){
+  if(!GAMES[g].local)return;LOC.g=g;LOC.cfg=defCfg(g);
+  const tm=GAMES[g].team;LOC.team=tm==='solo'||GAMES[g].kind==='bomb'?false:(ls('fej_team_'+g)!==false);
+  loadPeople();go('localSetup');
+}
+function loadPeople(){const key='fej_people_'+(LOC.team?'t':'p');const saved=ls(key);
+  if(saved&&saved.length)LOC.people=saved;else LOC.people=LOC.team?TEAMS.slice(0,2).map(t=>({...t})):[1,2,3].map(i=>({n:'Jogador '+i,a:AVATARS[(i*3)%AVATARS.length]}));
+  const[a,b]=pRange();while(LOC.people.length<a)addPerson();if(LOC.people.length>b)LOC.people.length=b;}
+function setTeamMode(t){LOC.team=t;ls('fej_team_'+LOC.g,t);loadPeople();tap();render();}
+function pRange(){const k=GAMES[LOC.g].kind;if(LOC.team)return[2,6];return k==='imp'?[3,12]:k==='quiz'?[1,12]:[2,12];}
+function addPerson(){const i=LOC.people.length;LOC.people.push(LOC.team?{...TEAMS[i%6]}:{n:'Jogador '+(i+1),a:AVATARS[(i*5+2)%AVATARS.length]});}
+function setCount(n){const[a,b]=pRange();n=Math.max(a,Math.min(b,n));while(LOC.people.length<n)addPerson();LOC.people.length=n;tap();render();}
+function cycleAv(i){const k=(AVATARS.indexOf(LOC.people[i].a)+1)%AVATARS.length;LOC.people[i].a=AVATARS[k];tap();render();}
+SCR.localSetup=()=>{
+  const g=LOC.g,gm=GAMES[g];const[a,b]=pRange();const canTeam=gm.team==='both'&&gm.kind!=='bomb';
+  return `<div class="topbar"><button class="ghost" onclick="go('localPick')">← Jogos</button><span class="pill">${gm.e} ${gm.n}</span><button class="ghost" onclick="openHelp('${g}')">❓ Regras</button></div>
+  <div class="scroll">
+   ${canTeam?`<div class="seg" style="margin-bottom:10px"><button class="${LOC.team?'sel':''}" onclick="setTeamMode(true)">👥 Em equipes</button><button class="${LOC.team?'':'sel'}" onclick="setTeamMode(false)">🙋 Cada um por si</button></div>`:''}
+   <div class="card"><h3>${LOC.team?'👥 EQUIPES':'🙋 JOGADORES'} <span class="small">(toque no bichinho pra trocar)</span></h3>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="ghost" onclick="setCount(${LOC.people.length-1})" ${LOC.people.length<=a?'disabled':''}>➖</button><b style="font-size:20px">${LOC.people.length} ${LOC.team?'equipes':'jogadores'}</b><button class="ghost" onclick="setCount(${LOC.people.length+1})" ${LOC.people.length>=b?'disabled':''}>➕</button></div>
+    ${LOC.people.map((p,i)=>`<div class="person" style="border-color:${COLORS[i%12]}"><button class="av" onclick="cycleAv(${i})">${esc(p.a)}</button><input maxlength="18" value="${esc(p.n)}" oninput="LOC.people[${i}].n=this.value"></div>`).join('')}
+   </div>
+   ${settingsHTML(g,LOC.cfg)}
+  </div>
+  <button class="wide btn-ok" onclick="localRules()">CONTINUAR ▶</button>`;
+};
+function localRules(){audio();LOC.people.forEach((p,i)=>{p.n=(p.n||'').trim()||(LOC.team?TEAMS[i%6].n:'Jogador '+(i+1));});
+  ls('fej_people_'+(LOC.team?'t':'p'),LOC.people);go('lrules');}
+SCR.lrules=()=>`<div class="topbar"><button class="ghost" onclick="go('localSetup')">← Voltar</button><span class="pill">📜 Regras</span></div>
+  <div class="scroll">${rulesHTML(LOC.g)}<div class="card"><h3>${LOC.team?'👥 EQUIPES':'🙋 JOGADORES'}</h3><div class="plist">${LOC.people.map((p,i)=>`<span class="pchip" style="background:${COLORS[i%12]}66">${esc(p.a)} ${esc(p.n)}</span>`).join('')}</div></div></div>
+  <button class="wide btn-ok" onclick="localStart()">ENTENDEMOS! BORA JOGAR 🎉</button>`;
+function localStart(){audio();wake();const k=GAMES[LOC.g].kind;
+  if(k==='turn')ltStart();else if(k==='quiz')lqStart();else if(k==='imp')liStart();else if(k==='bomb')lbStart();}
+
+/* ----- timer ----- */
+const TM={end:0,total:1,cb:null,raf:0,last:-1,paused:false,pauseAt:0,remote:null};
+function timerStart(sec,cb){TM.total=sec*1000;TM.end=Date.now()+TM.total;TM.cb=cb;TM.last=-1;TM.paused=false;TM.remote=null;cancelAnimationFrame(TM.raf);tLoop();}
+function timerStop(){cancelAnimationFrame(TM.raf);TM.cb=null;}
+function tLoop(){if(!TM.paused){const ms=Math.max(0,TM.end-Date.now());const sec=Math.ceil(ms/1000);
+    if(sec!==TM.last){TM.last=sec;if(sec<=5&&sec>0&&UI.s!=='on'){beep(sec===1?880:700,.08);buzz(30);}}
+    paintTimer(ms);
+    if(ms<=0){const cb=TM.cb;TM.cb=null;cb&&cb();return;}}
+  TM.raf=requestAnimationFrame(tLoop);}
+function paintTimer(ms){
+  const t=$('tnum'),a=$('arc');if(!t||!a)return;
+  let total=TM.total;
+  if(TM.remote){ms=TM.remote.te*1000;total=TM.remote.tt*1000;}
+  else if(ms===undefined)ms=Math.max(0,TM.end-Date.now());
+  const sec=Math.ceil(ms/1000);t.textContent=sec;$('ring').classList.toggle('low',sec<=10);
+  a.style.strokeDashoffset=232.5*(1-ms/total);a.style.stroke=ms<10000?'#ef4444':ms<total/2?'#fbbf24':'#34d399';
+}
+function countdown(cb){audio();const c=$('count'),n=$('countN');c.classList.add('on');let k=3;
+  const step=()=>{if(k===0){n.textContent='JÁ!';n.style.fontSize='120px';SFX.start();n.style.animation='none';void n.offsetWidth;n.style.animation='';
+      setTimeout(()=>{c.classList.remove('on');n.style.fontSize='';cb();},600);return;}
+    n.textContent=k;n.style.animation='none';void n.offsetWidth;n.style.animation='';beep(523,.12);buzz(40);k--;setTimeout(step,750);};step();}
+function pauseOv(){TM.paused=true;TM.pauseAt=Date.now();
+  $('sheet').innerHTML=`<div class="bigemoji">😴</div><div class="h2">PAUSADO</div><button class="wide btn-ok" onclick="unpause()">CONTINUAR ▶</button><button class="wide btn-blue" style="font-size:18px" onclick="unpause();openHelp(LOC.g);TM.paused=true;TM.pauseAt=Date.now();">📜 Ver regras</button><button class="wide ghost" onclick="unpause(2)">Sair do jogo</button>`;
+  $('ov').classList.add('on');}
+function unpause(x){$('ov').classList.remove('on');if(TM.paused){TM.end+=Date.now()-TM.pauseAt;TM.paused=false;}if(x===2){timerStop();if(LB)clearTimeout(LB.tick);go('home');}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&TM.cb&&!TM.paused&&UI.s!=='on'&&!TM.remote)pauseOv();});
+
+/* ----- MÍMICA / DESENHO / QUEM SOU EU (local) ----- */
+let LT=null;
+function ltStart(){LT={g:LOC.g,ents:LOC.people.map((p,i)=>({n:p.n,a:p.a,s:0,col:COLORS[i%12]})),k:0,ph:'pass',cur:null,sk:0,res:null};go('lt');}
+function ltEnt(){return LT.ents[LT.k%LT.ents.length];}
+function ltBegin(){countdown(()=>{LT.ph='play';LT.sk=LOC.cfg.skips;ltDraw();drReset('L'+LT.k);render();timerStart(LOC.cfg.time,()=>{if(LT.ph==='play')ltResult(false);});});}
+function ltDraw(){const c=LOC.cfg;const x=drawWord(c.cats,c.lvl);LT.cur={...x,g:c.gold&&Math.random()<.12,tw:LT.g==='mimica'&&c.crazy&&Math.random()<.28?pick(TWISTS):''};}
+function ltHit(){if(LT.ph!=='play'||TM.paused)return;
+  if(!LOC.team&&LT.g!=='quemsou'){LT.rem=Math.max(1000,TM.end-Date.now());timerStop();LT.ph='who';render();return;}
+  ltResult(true);}
+function ltBack(){LT.ph='play';render();timerStart(LT.rem/1000,()=>{if(LT.ph==='play')ltResult(false);});TM.total=LOC.cfg.time*1000;}
+function ltWho(i){if(LT.ph!=='who')return;const p=LT.cur.g?2:1;LT.ents[i].s+=p;ltResult(true,i);}
+function ltSkip(){if(LT.ph!=='play'||TM.paused)return;const c=LOC.cfg;if(c.skips!==99){if(LT.sk<=0){buzz([30,40,30]);return;}LT.sk--;}
+  SFX.skip();ltDraw();if(LT.g==='desenho')drClear(true);render();}
+function ltResult(ok,by){timerStop();const p=LT.cur.g?2:1;if(ok)ltEnt().s+=p;LT.res={ok,w:LT.cur.w,p,by};LT.ph='res';ok?(LT.cur.g?SFX.gold():SFX.hit()):SFX.end();render();}
+function ltNext(){LT.k++;if(LT.k%LT.ents.length===0&&Math.max(...LT.ents.map(e=>e.s))>=LOC.cfg.meta){LT.ph='final';SFX.final();}else LT.ph='pass';render();}
+const VERB={mimica:['🎭','faz a mímica','mímico'],desenho:['🎨','desenha','desenhista'],quemsou:['🤔','adivinha','adivinhador']};
+SCR.lt=()=>{
+  const e=ltEnt(),c=LOC.cfg,g=LT.g,idx=LT.k%LT.ents.length;const v=VERB[g];
+  const bar=`<div class="topbar"><span class="pill">🏁 Meta: ${c.meta} pts</span><button class="ghost" onclick="pauseOv()">⏸</button></div>`;
+  if(LT.ph==='pass')return `${bar}${boardHTML(LT.ents,idx)}<div class="spacer"></div>
+   <div class="bigemoji">${esc(e.a)}</div><div class="teamname" style="color:${e.col}">${LOC.team?esc(e.n):'Vez de '+esc(e.n)}</div>
+   <div class="role">${v[0]} ${LOC.team?`Escolham quem ${v[1]}!`:`${esc(e.n)} ${v[1]}!`}</div>
+   <p class="sub">${g==='mimica'?'📱 Passe o celular pro mímico. A palavra só aparece quando ele <b>segura o dedo</b> no cartão.'
+     :g==='desenho'?'📱 Passe o celular pro desenhista. Segure a barra branca pra ver a palavra e desenhe!'
+     :'🤔 Quem adivinha segura o celular <b>na testa</b>, com a tela virada pros outros. Os outros respondem só <b>sim ou não</b>!'}</p>
+   <div class="spacer"></div>${HOLD('ltBegin','SEGURE para começar')}`;
+  if(LT.ph==='play'){
+   const btns=`<div class="ctrls"><button class="btn-skip" onclick="ltSkip()" ${c.skips!==99&&LT.sk<=0?'disabled':''}>⏭ Pular<br><span style="font-size:13px">${c.skips===99?'livre':'restam '+LT.sk}</span></button><button class="btn-ok" onclick="ltHit()">✔ ACERTOU!</button></div>`;
+   const top=`<div class="top">${ringHTML()}<div style="text-align:center;flex:1"><div style="font-size:26px">${esc(e.a)}</div><div style="font-weight:800;color:${e.col}">${esc(e.n)}</div></div><div class="pts">${e.s}<small>pontos</small></div></div>`;
+   if(g==='desenho')return `${top}<div style="margin-top:8px">${wordBar(LT.cur)}</div>${canvasHTML(true)}${btns}`;
+   return `${top}<div class="stage">${g==='mimica'?PEEK(wordInner(LT.cur),LT.cur.g?'gold':'','SEGURE para ver a palavra'):`<div class="wcard ${LT.cur.g?'gold':''}">${wordInner(LT.cur)}</div>`}
+   <p class="small" style="text-align:center;margin-top:16px">${g==='mimica'?'🤫 Sem falar, sem apontar, sem som!':'🙋 Quem dá as dicas aperta os botões'}</p></div>${btns}`;}
+  if(LT.ph==='who')return `<div class="h2">🙋 Quem acertou?</div><p class="sub">Os dois ganham ${LT.cur.g?2:1} ponto${LT.cur.g?'s':''}!</p>
+   <div class="scroll"><div class="list">${LT.ents.map((p,i)=>i===idx?'':`<button class="li vote" onclick="ltWho(${i})"><span style="font-size:30px">${esc(p.a)}</span> ${esc(p.n)}</button>`).join('')}</div></div>
+   <button class="wide ghost" onclick="ltBack()">← Voltar</button>`;
+  if(LT.ph==='res'){const r=LT.res,nx=LT.ents[(LT.k+1)%LT.ents.length];
+   return `${boardHTML(LT.ents,idx)}<div class="spacer"></div><div class="bigemoji">${r.ok?'🎉':'⏰'}</div>
+   <div class="result" style="color:${r.ok?'#4ade80':'#f87171'}">${r.ok?`ACERTOU! +${r.p}`:'TEMPO ESGOTADO!'}</div>
+   ${r.ok&&r.by!=null?`<p class="sub">${esc(e.n)} e ${esc(LT.ents[r.by].n)} ganharam ponto!</p>`:''}
+   <p class="sub">A palavra era <b style="color:#fde68a;font-size:24px">${esc(r.w)}</b></p><div class="spacer"></div>
+   <button class="wide btn-pink" onclick="ltNext()">PRÓXIMA VEZ: ${esc(nx.a)} ${esc(nx.n)} ▶</button>`;}
+  return finalLocal(LT.ents,'ltStart()');
+};
+function finalLocal(list,again){return `<div class="h2">🏆 RESULTADO</div><p class="sub">${winnerMsg(list)}</p><div class="scroll">${podiumHTML(list)}</div>
+   <button class="wide btn-ok" onclick="${again}">REVANCHE! 🔥</button><button class="wide ghost" onclick="go('localSetup')">⚙ Mudar jogadores / configurações</button><button class="wide ghost" onclick="go('localPick')">🎮 Outro jogo</button>`;}
+
+/* ----- QUIZ / V-F / EMOJI (local) ----- */
+let LQ=null;
+function lqStart(){LQ={pl:LOC.people.map((p,i)=>({n:p.n,a:p.a,s:0,st:0,col:COLORS[i%12]})),i:0,k:0,ph:'pass',q:null,ch:-1};go('lq');}
+function lqShow(){LQ.q=drawAny(LOC.g,LOC.cfg);LQ.ch=-1;LQ.ph='q';SFX.start();render();timerStart(LOC.cfg.time,()=>lqAns(-1));}
+function lqAns(o){if(LQ.ph!=='q')return;timerStop();LQ.ch=o;LQ.ph='r';const p=LQ.pl[LQ.i];
+  if(o===LQ.q.ok){p.s++;p.st++;SFX.good();showStreak(p.st>=3?'🔥 '+p.st+' SEGUIDAS!':pick(['ACERTOU! 🎉','GÊNIO! 🧠','BOA! 👏','SABE TUDO! 🤓']));}else{p.st=0;SFX.bad();}render();}
+function lqNext(){LQ.k++;if(LQ.k>=LOC.cfg.n*LQ.pl.length){LQ.ph='final';SFX.final();render();return;}LQ.i=(LQ.i+1)%LQ.pl.length;if(LQ.pl.length>1){LQ.ph='pass';render();}else lqShow();}
+SCR.lq=()=>{const p=LQ.pl[LQ.i],c=LOC.cfg,tot=c.n*LQ.pl.length;
+  if(LQ.ph==='pass')return `${boardHTML(LQ.pl,LQ.i)}<div class="spacer"></div><p class="sub">Pergunta ${LQ.k+1} de ${tot}</p><div class="bigemoji">${esc(p.a)}</div><div class="teamname" style="color:${p.col}">Vez de ${esc(p.n)}</div><p class="sub">📱 Passe o celular! Valendo 1 ponto ${GAMES[LOC.g].e}</p><div class="spacer"></div>
+   <button class="wide btn-ok" onclick="lqShow()">MOSTRAR PERGUNTA 👀</button><button class="ghost" style="margin:10px auto 0;display:block" onclick="go('home')">Sair</button>`;
+  if(LQ.ph==='q'||LQ.ph==='r'){const st=LQ.ph==='r'?{ok:LQ.q.ok,ch:LQ.ch}:null;
+   return `<div class="top">${ringHTML()}<div style="flex:1;text-align:center"><span class="pill">${esc(LQ.q.s)}</span><div style="font-weight:800;margin-top:4px">${esc(p.a)} ${esc(p.n)}</div></div><div class="pts">${p.s}<small>pontos</small></div></div>
+   ${qHead(LQ.q)}${optsHTML(LQ.q,st,'lqAns')}
+   ${st?`<div class="result" style="color:${LQ.ch===LQ.q.ok?'#4ade80':'#f87171'}">${LQ.ch===LQ.q.ok?'✅ ACERTOU!':LQ.ch<0?'⏰ ACABOU O TEMPO':'❌ ERROU!'}</div>${LQ.q.x?`<div class="expl">🤓 ${esc(LQ.q.x)}</div>`:''}<div class="spacer"></div><button class="wide btn-pink" onclick="lqNext()">${LQ.k+1>=tot?'VER RESULTADO 🏆':'PRÓXIMA ▶'}</button>`:'<div class="spacer"></div>'}`;}
+  return finalLocal(LQ.pl,'lqStart()');
+};
+
+/* ----- IMPOSTOR (local) ----- */
+let LI=null;
+function liStart(){LI={pl:LOC.people.map((p,i)=>({n:p.n,a:p.a,s:0,col:COLORS[i%12]})),rd:0};liRound();go('li');}
+function liRound(){const c=LOC.cfg;const x=drawWord(c.cats,c.lvl);LI.w=x;LI.iw=c.secret?drawWord([x.k],c.lvl,x.w):null;LI.imp=ri(0,LI.pl.length-1);LI.ord=shuffle(LI.pl.map((_,i)=>i));LI.i=0;LI.ph='pass';LI.res=null;LI.rd++;render();}
+function liSee(){LI.ph='card';render();}
+function liHide(){LI.i++;LI.ph=LI.i>=LI.pl.length?'talk':'pass';tap();render();}
+function liReveal(){LI.ph='reveal';SFX.end();render();}
+function liScore(caught){LI.res=caught?1:2;if(caught){LI.pl.forEach((p,i)=>{if(i!==LI.imp)p.s++;});SFX.good();}else{LI.pl[LI.imp].s+=2;SFX.bad();}LI.ph='score';render();}
+function liGuess(){LI.pl[LI.imp].s+=2;LI.res=3;SFX.gold();render();}
+function impCard(isImp,w,iw,hint){
+  if(isImp&&iw)return `<div class="cat">${esc(iw.c)}</div><div class="word">${esc(iw.w)}</div><div style="margin-top:10px;font-weight:700">🤫 Não fale a palavra! Dê dicas discretas.</div>`;
+  return isImp?`<div style="font-size:64px">🕵️</div><div class="word" style="font-size:38px">VOCÊ É O IMPOSTOR!</div>${hint?`<div class="cat" style="color:#7f1d1d;margin-top:8px">Categoria: ${esc(w.c)}</div>`:''}<div style="margin-top:8px;font-weight:700">Disfarce e tente descobrir a palavra!</div>`
+  :`<div class="cat">${esc(w.c)}</div><div class="word">${esc(w.w)}</div><div style="margin-top:10px;font-weight:700">🤫 Não fale a palavra! Dê dicas discretas.</div>`;}
+SCR.li=()=>{const p=LI.pl[LI.i];
+  if(LI.ph==='pass')return `<div class="topbar"><span class="pill">🕵️ Rodada ${LI.rd}</span><span class="pill">Carta ${LI.i+1} de ${LI.pl.length}</span></div><div class="spacer"></div>
+   <div class="bigemoji">${esc(p.a)}</div><div class="teamname" style="color:${p.col}">${esc(p.n)}</div>
+   <p class="sub">📱 Passe o celular para <b>${esc(p.n)}</b>.<br>Só ${esc(p.n)} pode ver a carta! 🙈</p><div class="spacer"></div>${HOLD('liSee','SEGURE para ver sua carta','btn-gold')}
+   <button class="ghost" style="margin:10px auto 0;display:block" onclick="go('home')">Sair</button>`;
+  if(LI.ph==='card')return `<div class="spacer"></div><p class="sub">Carta de <b>${esc(p.n)}</b></p><div class="wcard ${LI.i===LI.imp&&!LI.iw?'imp':''}" style="min-height:45%">${impCard(LI.i===LI.imp,LI.w,LI.iw,LOC.cfg.hint)}</div><div class="spacer"></div>
+   <button class="wide btn-pink" onclick="liHide()">ENTENDI! ESCONDER 🙈</button>`;
+  if(LI.ph==='talk')return `<div class="spacer"></div><div class="bigemoji">🗣️</div><div class="h2">Hora das dicas!</div>
+   <div class="card"><h3>📢 ORDEM DE QUEM FALA</h3><div class="plist">${LI.ord.map((i,k)=>`<span class="pchip">${k+1}º ${esc(LI.pl[i].a)} ${esc(LI.pl[i].n)}</span>`).join('')}</div>
+   <div class="step"><div class="n">1</div><div>Cada um fala <b>UMA palavra</b> que lembre o segredo. Façam <b>2 voltas</b>.</div></div>
+   <div class="step"><div class="n">2</div><div>No <b>1, 2, 3</b>, todo mundo aponta pra quem acha que é o impostor!</div></div></div>
+   <div class="spacer"></div>${HOLD('liReveal','SEGURE para revelar o impostor','btn-pink')}`;
+  if(LI.ph==='reveal')return `<div class="spacer"></div><div class="bigemoji">🕵️</div><p class="sub">O impostor era…</p><div class="teamname" style="color:#f87171">${esc(LI.pl[LI.imp].a)} ${esc(LI.pl[LI.imp].n)}</div>
+   <p class="sub">A palavra era <b style="color:#fde68a;font-size:24px">${esc(LI.w.w)}</b>${LI.iw?`<br>O impostor tinha: <b style="color:#f87171">${esc(LI.iw.w)}</b>`:''}</p><div class="spacer"></div>
+   <button class="wide btn-ok" onclick="liScore(true)">✅ PEGAMOS O IMPOSTOR!</button><button class="wide btn-skip" onclick="liScore(false)">😈 ELE ESCAPOU</button>`;
+  return `<div class="result">${LI.res===2?'😈 O IMPOSTOR ESCAPOU! +2':LI.res===3?'🤯 O impostor adivinhou! +2':'🎉 PEGARAM O IMPOSTOR! +1 pra cada'}</div>
+   ${LI.res===1&&!LI.iw?`<button class="wide btn-gold" onclick="liGuess()">🤔 O impostor adivinhou a palavra? (+2 pra ele)</button>`:''}
+   <div class="scroll" style="margin-top:10px">${podiumHTML(LI.pl)}</div>
+   <button class="wide btn-ok" onclick="liRound()">NOVA RODADA 🔄</button><button class="wide ghost" onclick="go('localPick')">Terminar</button>`;
+};
+
+/* ----- BATATA QUENTE (local) ----- */
+let LB=null;
+const FUSE={s:[8,20],m:[15,35],l:[25,55]};
+function lbStart(){LB={pl:LOC.people.map((p,i)=>({n:p.n,a:p.a,s:0,col:COLORS[i%12]})),rd:0,ph:'ready'};lbRound();go('lb');}
+function lbRound(){LB.rd++;LB.pr=takeFrom(BATATA,x=>'B|'+x);LB.ph='ready';LB.pn=0;render();}
+function lbGo(){const f=FUSE[LOC.cfg.fuse];LB.end=Date.now()+ri(f[0],f[1])*1000;LB.start=Date.now();LB.ph='play';SFX.start();render();lbTick();}
+function lbTick(){clearTimeout(LB.tick);if(LB.ph!=='play'||UI.s!=='lb')return;const left=LB.end-Date.now();
+  if(left<=0){LB.ph='boom';SFX.boom();render();return;}
+  const iv=Math.max(120,Math.min(700,left/12));beep(1200,.03,'square',.15);buzz(15);LB.tick=setTimeout(lbTick,iv);}
+function lbPass(){if(LB.ph!=='play')return;LB.pn++;SFX.pass();const b=$('bombc');if(b)b.textContent=LB.pn;}
+function lbLose(i){LB.pl.forEach((p,k)=>{if(k!==i)p.s++;});LB.loser=i;LB.ph='res';SFX.good();render();}
+SCR.lb=()=>{const c=LOC.cfg;
+  if(LB.ph==='ready')return `${boardHTML(LB.pl,-1)}<div class="spacer"></div><p class="sub">Explosão ${LB.rd} de ${c.rounds}</p><div class="bigemoji">💣</div><div class="prompt">${esc(LB.pr)}</div>
+   <p class="sub">Quem segurar o celular fala uma resposta e <b>passa pro próximo</b>! Não vale repetir.</p><div class="spacer"></div>${HOLD('lbGo','SEGURE para acender o pavio','btn-pink')}`;
+  if(LB.ph==='play')return `<div class="spacer"></div><div class="prompt">${esc(LB.pr)}</div><div class="bomb">💣</div><p class="sub">Falou? Toque e <b>PASSE O CELULAR</b>! Passes: <b id="bombc">${LB.pn}</b></p><div class="spacer"></div>
+   <button class="wide btn-pink" style="font-size:30px;padding:26px" onclick="lbPass()">FALEI! PASSAR ➡</button>`;
+  if(LB.ph==='boom')return `<div class="spacer"></div><div class="boom">💥</div><div class="h2">BUUUM!</div><p class="sub">Quem estava com o celular?</p>
+   <div class="scroll"><div class="list">${LB.pl.map((p,i)=>`<button class="li vote" onclick="lbLose(${i})"><span style="font-size:30px">${esc(p.a)}</span> ${esc(p.n)}</button>`).join('')}</div></div>`;
+  if(LB.ph==='res'){const last=LB.rd>=c.rounds;return `${boardHTML(LB.pl,LB.loser)}<div class="spacer"></div><div class="bigemoji">🤣</div><div class="teamname" style="color:#f87171">${esc(LB.pl[LB.loser].n)} explodiu!</div><p class="sub">Todos os outros ganharam 1 ponto!</p><div class="spacer"></div>
+   <button class="wide btn-pink" onclick="${last?"LB.ph='final';SFX.final();render()":'lbRound()'}">${last?'VER RESULTADO 🏆':'PRÓXIMA BOMBA 💣'}</button>`;}
+  return finalLocal(LB.pl,'lbStart()');
+};
+
+/* =================== DESENHO (canvas) =================== */
+const PAL=['#111111','#ef4444','#2563eb','#16a34a','#f59e0b','#a855f7','#8b4513','#ec4899'];
+const DR={strokes:new Map(),cur:null,id:1,col:0,w:4,erase:false,cl:0,key:'',sendT:0,remoteKey:'',lastObj:null};
+function drReset(key){DR.strokes=new Map();DR.cur=null;DR.id=1;DR.cl=0;DR.key=key;DR.erase=false;}
+function drClear(local){DR.strokes.clear();DR.cl++;DR.cur=null;drawAll();if(!local)drSend();}
+function wordBar(x){return `<div class="wordbar peek"><div class="cover">👆 <b>SEGURE</b> aqui pra ver a palavra</div><div class="inner">${x.g?'⭐ ':''}<span class="small" style="color:#7c3aed">${esc(x.c)}:</span> <b>${esc(x.w)}</b></div></div>`;}
+function canvasHTML(drawable){return `<div class="cvwrap"><canvas id="cv" width="512" height="512" class="${drawable?'drawable':''}"></canvas></div>
+  ${drawable?`<div class="tools">${PAL.map((c,i)=>`<button class="col ${!DR.erase&&DR.col===i?'sel':''}" style="background:${c}" onclick="drCol(${i})"></button>`).join('')}</div>
+  <div class="tools"><button class="tb ${DR.w===2?'sel':''}" onclick="drW(2)">✏️ Fino</button><button class="tb ${DR.w===4?'sel':''}" onclick="drW(4)">🖍️ Médio</button><button class="tb ${DR.w===9?'sel':''}" onclick="drW(9)">🖌️ Grosso</button><button class="tb ${DR.erase?'sel':''}" onclick="drErase()">🧽</button><button class="tb" onclick="drClear()">🗑️</button></div>`:''}`;}
+function drCol(i){DR.col=i;DR.erase=false;tap();render();}
+function drW(w){DR.w=w;tap();render();}
+function drErase(){DR.erase=!DR.erase;tap();render();}
+function cvHook(){const c=$('cv');if(c)drawAll();}
+function drawAll(){const c=$('cv');if(!c)return;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,512,512);g.lineCap='round';g.lineJoin='round';
+  [...DR.strokes.values()].sort((a,b)=>a.id-b.id).forEach(s=>{if(!s.p.length)return;g.strokeStyle=s.e?'#ffffff':PAL[s.c]||'#111';g.lineWidth=(s.e?s.w*3:s.w)*2;g.beginPath();g.moveTo(s.p[0][0]*2,s.p[0][1]*2);
+    if(s.p.length===1)g.lineTo(s.p[0][0]*2+.1,s.p[0][1]*2);s.p.forEach(q=>g.lineTo(q[0]*2,q[1]*2));g.stroke();});}
+function drPt(e){const c=$('cv');const r=c.getBoundingClientRect();return[Math.max(0,Math.min(255,Math.round((e.clientX-r.left)/r.width*255))),Math.max(0,Math.min(255,Math.round((e.clientY-r.top)/r.height*255)))];}
+document.addEventListener('pointerdown',e=>{const c=e.target.closest('#cv.drawable');if(!c)return;e.preventDefault();
+  try{c.setPointerCapture(e.pointerId);}catch(x){}DR.cur={id:DR.id++,c:DR.col,w:DR.w,e:DR.erase?1:0,p:[drPt(e)]};DR.strokes.set(DR.cur.id,DR.cur);drawAll();drSendSoon();});
+document.addEventListener('pointermove',e=>{if(!DR.cur||!e.target.closest('#cv.drawable'))return;const p=drPt(e);const l=DR.cur.p[DR.cur.p.length-1];
+  if(Math.abs(p[0]-l[0])+Math.abs(p[1]-l[1])<2)return;DR.cur.p.push(p);
+  if(DR.cur.p.length>=60){const o=DR.cur;DR.cur={id:DR.id++,c:o.c,w:o.w,e:o.e,p:[p]};DR.strokes.set(DR.cur.id,DR.cur);}
+  drawAll();drSendSoon();});
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{if(DR.cur){DR.cur=null;drSendSoon();}}));
+const hx=n=>n.toString(16).padStart(2,'0');
+function drEnc(s){return[s.id,s.c,s.w,s.e,s.p.map(q=>hx(q[0])+hx(q[1])).join('')];}
+function drDec(a){const p=[];for(let i=0;i+3<a[4].length;i+=4)p.push([parseInt(a[4].substr(i,2),16),parseInt(a[4].substr(i+2,2),16)]);return{id:a[0],c:a[1],w:a[2],e:a[3],p};}
+function drSendSoon(){if(UI.s!=='on')return;if(DR.sendT)return;DR.sendT=setTimeout(()=>{DR.sendT=0;drSend();},90);}
+function drSend(){if(UI.s!=='on'||!NET.room)return;const all=[...DR.strokes.values()].sort((a,b)=>a.id-b.id).slice(-6).map(drEnc);
+  NET.room.presence({dw:{k:DR.key,cl:DR.cl,s:all}}).catch(()=>{});}
+function drRecv(dw){if(!dw||dw===DR.lastObj)return;DR.lastObj=dw;
+  if(dw.k!==DR.remoteKey){DR.remoteKey=dw.k;DR.strokes=new Map();DR.cl=dw.cl;}
+  if(dw.cl!==DR.cl){DR.strokes=new Map();DR.cl=dw.cl;}
+  (dw.s||[]).forEach(a=>{try{const s=drDec(a);DR.strokes.set(s.id,s);}catch(e){}});drawAll();}
+
+/* =================== PERFIL =================== */
+SCR.prof=()=>`<div class="topbar"><button class="ghost" onclick="go('home')">← Voltar</button><span class="pill">${UI.next==='create'?'🌐 Nova sala':'🔑 Entrar'}</span></div>
+ <div class="scroll">
+  <div class="h2">Quem é você?</div>
+  <div class="card"><h3>✏️ SEU NOME</h3><input class="txt" id="pname" maxlength="14" placeholder="Seu nome" value="${esc(PROF.n)}" oninput="PROF.n=this.value"></div>
+  <div class="card"><h3>😀 SEU BICHINHO</h3><div class="avgrid">${AVATARS.map(a=>`<button class="${a===PROF.a?'sel':''}" onclick="PROF.a='${a}';tap();render()">${a}</button>`).join('')}</div></div>
+  ${UI.next==='join'?`<div class="card"><h3>🔑 CÓDIGO DA SALA</h3><input class="txt codein" id="pcode" maxlength="4" placeholder="ABCD" value="${esc(UI.code||'')}" oninput="UI.code=this.value.toUpperCase()" autocapitalize="characters"></div>`:''}
+  ${UI.err?`<div class="tipbox">⚠️ ${UI.err}</div>`:''}
+ </div>
+ <button class="wide ${UI.next==='create'?'btn-ok':'btn-blue'}" onclick="profGo()">${UI.next==='create'?'PRÓXIMO: ESCOLHER O JOGO ▶':'ENTRAR NA SALA 🚪'}</button>`;
+const NOROOM='Não deu pra conectar a sala online aqui. 😕 A sala online funciona abrindo este jogo pelo Claude, com login, e cada pessoa precisa ter acesso ao link compartilhado. Enquanto isso, dá pra jogar no modo "celular só"!';
+async function profGo(){
+  audio();PROF.n=(PROF.n||'').trim().slice(0,14);
+  if(!PROF.n){UI.err='Escreva seu nome 😉';render();return;}
+  ls('fej_prof',PROF);UI.err='';
+  if(UI.next==='create'){HS=newHS();go('hostSetup');return;}
+  const c=(UI.code||'').trim().toUpperCase();if(!/^[A-Z]{4}$/.test(c)){UI.err='O código tem 4 letras.';render();return;}
+  go('on');const r=await getRoom();
+  if(!r){UI.err=NOROOM;go('prof');return;}
+  joinRoom(c);
+}
+
+/* =================== CONFIGURAR SALA (anfitrião) =================== */
+let HS=null;
+function newHS(){const saved=ls('fej_hs')||{};const g=saved.g&&GAMES[saved.g]?saved.g:'mimica';
+  return{g,tm:saved.tm!==false,nt:saved.nt||2,tn:saved.tn||TEAMS.map(t=>t.n),ta:saved.ta||TEAMS.map(t=>t.a),cfg:defCfg(g),inRoom:false};}
+function hsGame(g){HS.g=g;HS.cfg=HC[g]?JSON.parse(JSON.stringify(HC[g])):defCfg(g);if(GAMES[g].team==='solo')HS.tm=false;tap();render();}
+function hsTeam(t){if(GAMES[HS.g].team==='solo')return;HS.tm=t;tap();render();}
+function hsNT(n){HS.nt=Math.max(2,Math.min(6,n));tap();render();}
+function hsAv(i){const k=(AVATARS.indexOf(HS.ta[i])+1)%AVATARS.length;HS.ta[i]=AVATARS[k];tap();render();}
+function hsRandName(i){let n;do{n=pick(TNAMES)}while(HS.tn.includes(n));HS.tn[i]=n;tap();render();}
+SCR.hostSetup=()=>{const gm=GAMES[HS.g];const solo=gm.team==='solo';
+  return `<div class="topbar"><button class="ghost" onclick="${HS.inRoom?"go('on')":"go('prof')"}">← Voltar</button><span class="pill">⚙ Configurar sala</span></div>
+  <div class="scroll">
+   <div class="h2" style="font-size:28px">1. Escolha o jogo</div>${gameCards(HS.g,'hsGame',false)}
+   <div class="h2" style="font-size:28px;margin-top:14px">2. Como vão jogar?</div>
+   ${solo?`<div class="card"><b>🙋 Cada um por si</b><div class="small">Esse jogo é individual.</div></div>`:
+   `<div class="seg" style="margin-bottom:10px"><button class="${HS.tm?'sel':''}" onclick="hsTeam(true)">👥 Em equipes</button><button class="${HS.tm?'':'sel'}" onclick="hsTeam(false)">🙋 Cada um por si</button></div>`}
+   ${HS.tm&&!solo?`<div class="card"><h3>👥 QUANTAS EQUIPES?</h3><div class="row" style="justify-content:space-between;margin-bottom:10px"><button class="ghost" onclick="hsNT(${HS.nt-1})" ${HS.nt<=2?'disabled':''}>➖</button><b style="font-size:24px">${HS.nt} equipes</b><button class="ghost" onclick="hsNT(${HS.nt+1})" ${HS.nt>=6?'disabled':''}>➕</button></div>
+     ${Array.from({length:HS.nt},(_,i)=>`<div class="tname"><span class="dot" style="background:${COLORS[i]}"></span><button onclick="hsAv(${i})">${esc(HS.ta[i])}</button><input maxlength="18" value="${esc(HS.tn[i])}" oninput="HS.tn[${i}]=this.value"><button onclick="hsRandName(${i})">🎲</button></div>`).join('')}
+     <div class="small">Cada pessoa escolhe a própria equipe quando entrar. Você também pode sortear depois.</div></div>`:''}
+   <div class="h2" style="font-size:28px;margin-top:6px">3. Configurações</div>
+   ${settingsHTML(HS.g,HS.cfg)}
+  </div>
+  <button class="wide btn-ok" onclick="hsDone()">${HS.inRoom?'SALVAR ✅':'CRIAR SALA 🚀'}</button>`;};
+async function hsDone(){
+  HS.tn=HS.tn.map((n,i)=>(n||'').trim()||TEAMS[i].n);
+  ls('fej_hs',{g:HS.g,tm:HS.tm,nt:HS.nt,tn:HS.tn,ta:HS.ta});HC[HS.g]=HS.cfg;
+  if(HS.inRoom){applyHS();pub();go('on');return;}
+  go('on');const r=await getRoom();if(!r){UI.err=NOROOM;go('prof');return;}
+  createRoom();
+}
+function applyHS(){
+  const tm=HS.tm&&GAMES[HS.g].team!=='solo';
+  G.g=HS.g;G.cfg=HS.cfg;G.tm=tm?1:0;
+  if(tm){G.T=Array.from({length:HS.nt},(_,i)=>({n:HS.tn[i],a:HS.ta[i],s:0}));G.P.forEach(p=>{if(p.t==null||p.t>=HS.nt)p.t=null;});}
+  else{G.T=null;G.P.forEach(p=>p.t=null);}
+  G.P.forEach(p=>p.s=0);G.ph='lobby';
+}
+
+/* =================== CONEXÃO =================== */
+const NET={room:null,me:null,code:'',host:false,peers:[],seq:0,seen:{},lastG:null,hostSeen:false,lostT:0};
+let G=null;const H={timer:null,resp:{},votes:{},rot:[],auto:0,boom:0,usedL:[],ans:{},inv:new Set()};const HC={};
+const L={ans:{},vote:{},fxn:0,ph:'',joinT:0,rdy:-1,reSeen:{},ren:0,stop:[],stopK:'',stT:0,lastTe:null,tick:0};
+async function getRoom(){
+  if(NET.room)return NET.room;
+  for(let i=0;i<30&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
+  try{if(!window.claude||!window.claude.use)return null;const r=await window.claude.use('room');if(!r)return null;
+    NET.room=r;r.onPeers(onPeers,()=>{});return r;}catch(e){return null}
+}
+function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let s='';for(let i=0;i<4;i++)s+=pick(A.split(''));return s;}
+function createRoom(){
+  NET.code=genCode();NET.host=true;NET.seen={};HS.inRoom=true;
+  G={c:NET.code,ph:'lobby',g:HS.g,tm:0,T:null,P:[],cfg:HS.cfg,fx:{n:0,k:''},v:0,gid:0};
+  applyHS();
+  NET.room.presence({c:NET.code,h:1,n:PROF.n,a:PROF.a,act:null,g:G,re:null,st:null,dw:null,rdy:null}).catch(()=>{});
+  hostSync();pub();
+  clearInterval(H.iv);H.iv=setInterval(hostTick,200);wake();
+}
+function joinRoom(code){
+  NET.code=code;NET.host=false;G=null;NET.lastG=null;NET.hostSeen=false;L.ans={};L.vote={};L.fxn=0;
+  NET.room.presence({c:code,h:0,n:PROF.n,a:PROF.a,act:{s:NET.seq},g:null,re:null,st:null,dw:null,rdy:null}).catch(()=>{});
+  L.joinT=setTimeout(()=>{if(!G&&UI.s==='on'){UI.err=`Não achei a sala <b>${esc(code)}</b>. Confira o código e se o anfitrião está com o jogo aberto.`;leaveRoom(true);go('prof');}},9000);
+  wake();render();
+}
+function leaveRoom(silent){
+  clearInterval(H.iv);clearTimeout(L.joinT);clearTimeout(H.auto);clearInterval(L.tick);L.tick=0;timerStop();TM.remote=null;
+  if(NET.room)NET.room.presence({c:null,h:null,g:null,act:null,st:null,dw:null,re:null,rdy:null}).catch(()=>{});
+  NET.code='';NET.host=false;G=null;if(HS)HS.inRoom=false;if(!silent)go('home');
+}
+function myPeers(){return NET.peers.filter(p=>p.presence&&p.presence.c===NET.code);}
+function onPeers(ch){
+  NET.peers=ch.peers;const meP=ch.peers.find(p=>p.isMe&&p.sameTab);if(meP)NET.me=meP.peer;
+  if(!NET.code)return;
+  reactScan();
+  if(NET.host){hostSync();drawScan();return;}
+  const hp=ch.peers.find(p=>p.presence&&p.presence.c===NET.code&&p.presence.h===1);
+  if(hp&&hp.presence.g){NET.hostSeen=true;clearTimeout(NET.lostT);NET.lostT=0;if(hp.presence.g!==NET.lastG){NET.lastG=hp.presence.g;G=hp.presence.g;clearTimeout(L.joinT);onG();}}
+  else if(NET.hostSeen&&!NET.lostT){NET.lostT=setTimeout(()=>{NET.lostT=0;const still=NET.peers.find(p=>p.presence&&p.presence.c===NET.code&&p.presence.h===1);if(!still&&NET.code){UI.err='O anfitrião saiu da sala. 😢';leaveRoom(true);go('prof');}},6000);}
+  drawScan();
+}
+function reactScan(){myPeers().forEach(p=>{const r=p.presence.re;if(!r||typeof r.n!=='number')return;const prev=L.reSeen[p.peer];L.reSeen[p.peer]=r.n;
+  if(prev!==undefined&&prev!==r.n&&!(p.isMe&&p.sameTab))floater(String(r.e).slice(0,14),String(p.presence.n||'').slice(0,14),r.t);});}
+function react(e,t){audio();L.ren++;tap();floater(e,'você',t);NET.room&&NET.room.presence({re:{n:L.ren,e,t:t?1:0}}).catch(()=>{});}
+function reactBar(){return `<div class="react">${REACT.map(e=>`<button onclick="react('${e}')">${e}</button>`).join('')}</div>`;}
+function drKey(){return G?`${G.gid}-${G.k}-${G.wid}`:'';}
+function drawScan(){if(!G||G.g!=='desenho'||G.ph!=='tp'||!G.tu||G.tu.a===NET.me)return;
+  const ap=NET.peers.find(p=>p.peer===G.tu.a);if(!ap||!ap.presence)return;const dw=ap.presence.dw;if(dw&&dw.k===drKey())drRecv(dw);}
+function onG(){
+  if(!G)return;
+  if(G.fx&&G.fx.n!==L.fxn){const first=L.fxn===0&&!NET.host;L.fxn=G.fx.n;if(!first&&SFX[G.fx.k])SFX[G.fx.k]();}
+  if(G.ph!==L.ph){UI.forceAnim=true;const prev=L.ph;L.ph=G.ph;phaseEnter(prev);}
+  TM.remote=(G.te!=null&&['tp','qq','stp'].includes(G.ph))?{te:G.te,tt:G.tt}:null;
+  if(TM.remote&&TM.remote.te<=5&&TM.remote.te>0&&L.lastTe!==G.te){beep(G.te===1?880:700,.08);buzz(30);}L.lastTe=G.te;
+  if(G.g==='desenho'&&G.ph==='tp'&&G.tu){if(G.tu.a===NET.me){if(DR.key!==drKey()){drReset(drKey());drSend();}}else if(DR.viewKey!==drKey()){DR.viewKey=drKey();DR.remoteKey=drKey();DR.strokes=new Map();DR.cl=0;}}
+  else if(DR.key&&UI.s==='on'){DR.key='';NET.room&&NET.room.presence({dw:null}).catch(()=>{});}
+  bombTick();
+  if(UI.s==='on')render();
+}
+function phaseEnter(prev){
+  if(G.ph==='stp'&&L.stopK!==stopKey()){L.stopK=stopKey();L.stop=Array(G.cfg.sc.length).fill('');stopSend();letterRoulette(G.L);}
+  if(G.ph==='sx')stopSend();
+  if(G.ph==='rules')L.rdy=-1;
+}
+function bombTick(){const on=G&&G.ph==='bp'&&G.hold===NET.me;
+  if(on&&!L.tick){L.tick=setInterval(()=>{beep(1200,.03,'square',.15);buzz(20);},380);}
+  else if(!on&&L.tick){clearInterval(L.tick);L.tick=0;}}
+function letterRoulette(final){const c=$('count'),n=$('countN');c.classList.add('on');let k=0;
+  const it=setInterval(()=>{n.textContent=pick(LETTERS);n.style.animation='none';beep(400+k*30,.04);k++;
+    if(k>14){clearInterval(it);n.textContent=final;n.style.animation='';void n.offsetWidth;beep(988,.3);buzz(80);setTimeout(()=>c.classList.remove('on'),900);}},80);}
+
+/* =================== ANFITRIÃO =================== */
+function online(){return G.P.filter(p=>p.on);}
+function pBy(id){return G&&G.P.find(p=>p.i===id);}
+function hostSync(){
+  if(!G||!NET.me)return;let ch=false;
+  const ps=myPeers().filter(p=>p.presence.h===0&&p.kind==='viewer');
+  const ensure=(id,n,a)=>{let x=pBy(id);n=String(n||'Jogador').slice(0,14);a=String(a||'🙂').slice(0,8);
+    if(!x){if(G.P.length>=16)return;x={i:id,n,a,s:0,on:1,t:null};if(G.T&&G.ph!=='lobby')x.t=smallTeam();G.P.push(x);ch=true;}
+    else if(x.n!==n||x.a!==a){x.n=n;x.a=a;ch=true;}};
+  ensure(NET.me,PROF.n,PROF.a);
+  ps.forEach(p=>ensure(p.peer,p.presence.n,p.presence.a));
+  G.P.forEach(x=>{const on=x.i===NET.me||ps.some(p=>p.peer===x.i)?1:0;if(x.on!==on){x.on=on;ch=true;}});
+  G.P=G.P.filter(x=>x.on||x.s>0||G.ph!=='lobby');
+  ps.forEach(p=>{const a=p.presence.act;if(a&&typeof a.s==='number'&&a.s>(NET.seen[p.peer]||0)){NET.seen[p.peer]=a.s;hostAct(p.peer,a.k,a.d);ch=true;}});
+  if(G.ph==='rules'){const nr=online().filter(p=>p.i===NET.me?L.rdy===G.gid:(ps.find(q=>q.peer===p.i)||{presence:{}}).presence.rdy===G.gid).length;if(nr!==G.nr){G.nr=nr;G.rd2=online().filter(p=>p.i===NET.me?L.rdy===G.gid:(ps.find(q=>q.peer===p.i)||{presence:{}}).presence.rdy===G.gid).map(p=>p.i);ch=true;}}
+  if(G.ph==='stp'){const nd=online().filter(p=>{const a=playerAnswers(p.i);return a&&a.every(x=>x&&x.trim());}).length;if(nd!==G.nd){G.nd=nd;ch=true;}}
+  if(G.ph==='qq'&&online().length&&online().every(p=>H.resp[p.i])){qReveal();ch=true;}
+  if(G.ph==='iv'&&online().length&&online().every(p=>H.votes[p.i])){impRes();ch=true;}
+  if(ch)pub();
+}
+function smallTeam(){if(!G.T)return null;const c=G.T.map((_,k)=>G.P.filter(p=>p.on&&p.t===k).length);return c.indexOf(Math.min(...c));}
+function pub(){if(!G)return;G.v++;if(NET.room)NET.room.presence({g:JSON.parse(JSON.stringify(G))}).catch(()=>{});onG();}
+function fx(k){G.fx={n:G.fx.n+1,k};}
+function hTimer(sec,cb){H.timer={end:Date.now()+sec*1000,cb};G.tt=sec;G.te=sec;}
+function hostTick(){if(!G)return;
+  if(G.ph==='bp'&&H.boom&&Date.now()>=H.boom){H.boom=0;bombBoom();pub();return;}
+  if(!H.timer)return;const ms=H.timer.end-Date.now();const s=Math.max(0,Math.ceil(ms/1000));
+  if(s!==G.te){G.te=s;if(s<=0){const cb=H.timer.cb;H.timer=null;cb();}pub();}}
+function act(k,d){audio();if(NET.host){hostAct(NET.me,k,d);pub();return;}NET.seq++;NET.room&&NET.room.presence({act:{s:NET.seq,k,d:d===undefined?null:d}}).catch(()=>{});}
+function canStart(){const n=online().length,gm=GAMES[G.g];
+  if(n<gm.min)return `Precisa de pelo menos ${gm.min} pessoas na sala.`;
+  if(G.T&&gm.kind==='turn'){const used=G.T.filter((_,k)=>online().some(p=>p.t===k)).length;if(used<2&&online().filter(p=>p.t==null).length===0)return 'Precisa de gente em pelo menos 2 equipes.';}
+  return '';}
+function hostAct(id,k,d){
+  const isH=id===NET.me,c=G.cfg,me=pBy(id);if(!me)return;
+  /* sala */
+  if(k==='team'&&G.T&&G.ph==='lobby'&&d>=0&&d<G.T.length){me.t=d;return;}
+  if(k==='move'&&isH&&G.T&&G.ph==='lobby'){const p=pBy(d);if(p)p.t=p.t==null?0:(p.t+1)%G.T.length;return;}
+  if(k==='shuffle'&&isH&&G.T&&G.ph==='lobby'){shuffle(online()).forEach((p,i)=>p.t=i%G.T.length);fx('pass');return;}
+  if(k==='start'&&isH&&G.ph==='lobby'){if(canStart())return;startRules();return;}
+  if(k==='begin'&&isH&&G.ph==='rules'){beginGame();return;}
+  if(k==='again'&&isH&&G.ph==='fin'){resetScores();G.gid++;beginGame();return;}
+  if(k==='lobby'&&isH){H.timer=null;clearTimeout(H.auto);H.boom=0;G.ph='lobby';resetScores();return;}
+  if(k==='end'&&isH&&G.ph!=='lobby'&&G.ph!=='fin'){final();return;}
+  const kind=GAMES[G.g].kind;
+  if(kind==='turn')turnAct(id,isH,k,d);else if(kind==='quiz')quizAct(id,isH,k,d);else if(kind==='imp')impAct(id,isH,k,d);else if(kind==='stop')stopAct(id,isH,k,d);else if(kind==='bomb')bombAct(id,isH,k,d);
+}
+function resetScores(){G.P.forEach(p=>{p.s=0;p.st=0;p.ok=0;});if(G.T)G.T.forEach(t=>t.s=0);}
+function startRules(){if(G.T)G.P.forEach(p=>{if(p.on&&(p.t==null||p.t>=G.T.length))p.t=smallTeam();});
+  resetScores();G.gid++;G.ph='rules';G.nr=0;G.rd2=[];fx('start');}
+function beginGame(){const k=GAMES[G.g].kind;
+  if(k==='turn')turnBegin();else if(k==='quiz')quizBegin();else if(k==='imp')impBegin();else if(k==='stop')stopBegin();else bombBegin();}
+function final(){H.timer=null;clearTimeout(H.auto);H.boom=0;G.ph='fin';fx('final');}
+
+/* ----- vez (mímica / desenho / quem sou eu) ----- */
+function turnBegin(){G.k=0;G.ac=G.T?G.T.map(()=>0):null;H.rot=shuffle(online()).map(p=>p.i);turnIntro();}
+function turnIntro(){let a=null,t=null,guard=0;
+  while(guard++<40){
+    if(G.T){t=G.k%G.T.length;const mem=online().filter(p=>p.t===t);if(mem.length){a=mem[G.ac[t]%mem.length].i;break;}G.k++;}
+    else{H.rot=H.rot.filter(id=>pBy(id));online().forEach(p=>{if(!H.rot.includes(p.i))H.rot.push(p.i);});const id=H.rot[G.k%H.rot.length];const p=pBy(id);if(p&&p.on){a=id;break;}G.k++;}
+  }
+  G.tu={a,t};G.ph='ti';G.w=null;G.res=null;}
+function nextWord(){const c=G.cfg;const x=drawWord(c.cats,c.lvl);G.wid=(G.wid||0)+1;G.w={c:x.c,w:x.w,g:c.gold&&Math.random()<.12?1:0,tw:G.g==='mimica'&&c.crazy&&Math.random()<.28?pick(TWISTS):''};}
+function turnAct(id,isH,k,d){const c=G.cfg,actor=G.tu&&G.tu.a,qs=G.g==='quemsou';
+  if(k==='go'&&G.ph==='ti'&&(id===actor||isH)){G.ph='tp';G.sk=c.skips;nextWord();hTimer(c.time,()=>turnRes(false));fx('start');return;}
+  if(k==='hit'&&G.ph==='tp'&&d&&d.w===G.wid&&(qs?(id!==actor||isH):(id===actor||isH))){
+    const pts=G.w.g?2:1;let by=null;
+    if(!G.T&&!qs){const b=pBy(d.by);if(!b||d.by===actor)return;by=d.by;b.s+=pts;}
+    const a=pBy(actor);if(a)a.s+=pts;if(G.T)G.T[G.tu.t].s+=pts;turnRes(true,by);return;}
+  if(k==='skip'&&G.ph==='tp'&&d&&d.w===G.wid&&(qs||id===actor||isH)){if(c.skips!==99){if(G.sk<=0)return;G.sk--;}nextWord();fx('skip');return;}
+  if(k==='swap'&&isH&&G.ph==='ti'){if(G.T)G.ac[G.tu.t]++;else{const i=H.rot.indexOf(actor);if(i>=0){H.rot.splice(i,1);H.rot.push(actor);}}turnIntro();return;}
+  if(k==='next'&&isH&&G.ph==='tr'){turnNext();return;}
+}
+function turnRes(ok,by){H.timer=null;G.res={ok:ok?1:0,w:G.w.w,p:G.w.g?2:1,by:by||null};G.ph='tr';fx(ok?(G.w.g?'gold':'hit'):'end');
+  clearTimeout(H.auto);H.auto=setTimeout(()=>{if(G&&G.ph==='tr'){turnNext();pub();}},6000);}
+function turnNext(){clearTimeout(H.auto);if(G.T)G.ac[G.tu.t]++;G.k++;const len=G.T?G.T.length:H.rot.length;
+  if(G.k%len===0){const max=Math.max(...(G.T?G.T:G.P).map(x=>x.s));if(max>=G.cfg.meta||G.k>300){final();return;}}turnIntro();}
+
+/* ----- quiz / verdade ou mentira / emoji ----- */
+function quizBegin(){G.qi=0;nextQ();}
+function nextQ(){const q=drawAny(G.g,G.cfg);H.ok=q.ok;H.resp={};H.x=q.x||'';G.q={s:q.s,t:q.t,o:q.o,em:q.em||0};G.qi++;G.ph='qq';G.na=0;G.ok=-1;G.rs={};G.trs=null;hTimer(G.cfg.time,qReveal);fx('start');}
+function quizAct(id,isH,k,d){
+  if(k==='ans'&&G.ph==='qq'&&d&&d.q===G.qi&&!H.resp[id]&&d.o>=0&&d.o<G.q.o.length){H.resp[id]={o:d.o,left:H.timer?H.timer.end-Date.now():0};G.na=Object.keys(H.resp).length;if(online().every(p=>H.resp[p.i]))qReveal();return;}
+  if(k==='next'&&isH&&G.ph==='qr'){if(G.qi>=G.cfg.n)final();else nextQ();return;}
+  if(k==='reveal'&&isH&&G.ph==='qq'){qReveal();return;}
+}
+function qReveal(){if(G.ph!=='qq')return;H.timer=null;G.ph='qr';G.ok=H.ok;G.rs={};G.q.x=H.x;
+  G.P.forEach(p=>{const r=H.resp[p.i];if(r&&r.o===H.ok){const pts=500+Math.round(500*Math.max(0,r.left)/(G.cfg.time*1000))+Math.min(p.st||0,5)*100;p.st=(p.st||0)+1;p.ok=(p.ok||0)+1;p.s+=pts;G.rs[p.i]=[r.o,pts,p.st];}else{p.st=0;if(r)G.rs[p.i]=[r.o,0,0];}});
+  if(G.T){G.trs=G.T.map((t,k)=>{const m=Math.max(0,...G.P.filter(p=>p.t===k).map(p=>G.rs[p.i]?G.rs[p.i][1]:0));t.s+=m;return m;});}
+  fx('end');}
+
+/* ----- impostor ----- */
+function impBegin(){G.rd=0;impRound();}
+function impRound(){const c=G.cfg,on=online();const x=drawWord(c.cats,c.lvl);const iw=c.secret?drawWord([x.k],c.lvl,x.w):null;
+  G.w={c:x.c,w:x.w};G.iw=iw?{c:iw.c,w:iw.w}:null;G.imp=pick(on).i;G.ord=shuffle(on).map(p=>p.i);G.ph='ic';G.rd=(G.rd||0)+1;G.nv=0;G.res=null;H.votes={};fx('start');}
+function impAct(id,isH,k,d){
+  if(k==='vote0'&&isH&&G.ph==='ic'){G.ph='iv';H.votes={};G.nv=0;fx('start');return;}
+  if(k==='vote'&&G.ph==='iv'&&!H.votes[id]&&pBy(d)&&d!==id){H.votes[id]=d;G.nv=Object.keys(H.votes).length;if(online().every(p=>H.votes[p.i]))impRes();return;}
+  if(k==='close'&&isH&&G.ph==='iv'){impRes();return;}
+  if(k==='guess'&&isH&&G.ph==='ir'&&G.res.c&&!G.res.g&&!G.iw){const p=pBy(G.imp);if(p)p.s+=2;G.res.g=1;fx('gold');return;}
+  if(k==='next'&&isH&&G.ph==='ir'){impRound();return;}
+}
+function impRes(){if(G.ph!=='iv')return;const cnt={};Object.values(H.votes).forEach(v=>cnt[v]=(cnt[v]||0)+1);
+  let top=null,max=0,tie=false;for(const k in cnt){if(cnt[k]>max){max=cnt[k];top=k;tie=false;}else if(cnt[k]===max)tie=true;}
+  const caught=!tie&&top===G.imp;
+  if(caught)G.P.forEach(p=>{if(p.i!==G.imp&&p.on)p.s+=1;});else{const p=pBy(G.imp);if(p)p.s+=2;}
+  G.res={c:caught?1:0,v:tie?null:top,n:cnt,g:0};G.ph='ir';fx(caught?'good':'bad');}
+
+/* ----- stop ----- */
+function stopKey(){return G?`${G.gid}-${G.rd}`:'';}
+function stopBegin(){G.rd=0;H.usedL=[];stopRound();}
+function stopRound(){G.rd++;let l,g=0;do{l=pick(LETTERS)}while(H.usedL.includes(l)&&g++<50);H.usedL.push(l);
+  G.L=l;G.ph='stp';G.sb=null;G.nd=0;G.sp=null;G.inv=[];H.inv=new Set();hTimer(G.cfg.time,()=>stopNow(null));fx('start');}
+function playerAnswers(id){if(id===NET.me)return L.stopK===stopKey()?L.stop:null;
+  if(NET.host&&G.ph==='sv'&&H.ans[id])return H.ans[id];
+  const p=NET.peers.find(q=>q.peer===id);const st=p&&p.presence&&p.presence.st;return st&&st.k===stopKey()&&Array.isArray(st.a)?st.a.map(x=>String(x||'').slice(0,24)):null;}
+function stopAct(id,isH,k,d){
+  if(k==='stop'&&G.ph==='stp'&&d===stopKey()){const a=playerAnswers(id);if(!a||!a.every(x=>x&&x.trim()))return;stopNow(id);return;}
+  if(k==='inv'&&isH&&G.ph==='sv'&&d){const key=d.i+'|'+d.j;H.inv.has(key)?H.inv.delete(key):H.inv.add(key);stopCompute();return;}
+  if(k==='next'&&isH&&G.ph==='sv'){stopCommit();if(G.rd>=G.cfg.rounds)final();else stopRound();return;}
+}
+function stopNow(by){if(G.ph!=='stp')return;H.timer=null;G.ph='sx';G.sb=by;fx('stop');
+  setTimeout(()=>{if(G&&G.ph==='sx'){stopScore();pub();}},2200);}
+function stopValid(a,j){const v=norm(a[j]);return v.length>=2&&v[0]===norm(G.L);}
+function stopScore(){H.ans={};G.P.forEach(p=>{const a=playerAnswers(p.i);if(a||p.on)H.ans[p.i]=(a||[]).slice(0,G.cfg.sc.length);});stopCompute();G.ph='sv';}
+function stopCompute(){const n=G.cfg.sc.length;G.sp={};G.inv=[...H.inv];
+  for(let j=0;j<n;j++){const vals={};const valid=[];
+    for(const id in H.ans){const a=H.ans[id];if(a[j]&&stopValid(a,j)&&!H.inv.has(id+'|'+j)){const v=norm(a[j]);valid.push([id,v]);vals[v]=(vals[v]||0)+1;}}
+    for(const id in H.ans){if(!G.sp[id])G.sp[id]=Array(n).fill(0);const e=valid.find(x=>x[0]===id);if(!e)continue;G.sp[id][j]=valid.length===1?20:vals[e[1]]>1?5:10;}
+  }
+  G.sa=JSON.stringify(H.ans).length<1400?H.ans:null;}
+function stopCommit(){for(const id in G.sp){const s=G.sp[id].reduce((a,b)=>a+b,0);const p=pBy(id);if(p){p.s+=s;if(G.T&&p.t!=null&&G.T[p.t])G.T[p.t].s+=s;}}}
+let stopSendT=0;
+function stopSend(){if(!NET.room||!G||L.stopK!==stopKey())return;const full=L.stop.every(x=>x&&x.trim());NET.room.presence({st:{k:L.stopK,a:L.stop.map(x=>x.slice(0,24)),d:full?1:0}}).catch(()=>{});}
+function stopIn(j,el){L.stop[j]=el.value;const ok=stopValid(L.stop,j);el.classList.toggle('okl',ok);el.classList.toggle('bad',!!el.value.trim()&&!ok);
+  const b=$('stopbtn');if(b)b.disabled=!L.stop.every(x=>x&&x.trim());clearTimeout(stopSendT);stopSendT=setTimeout(stopSend,250);}
+function stopPress(){if(!L.stop.every(x=>x&&x.trim()))return;stopSend();setTimeout(()=>act('stop',stopKey()),300);}
+function stopLive(){const e=$('stopnd');if(e)e.textContent=`${G.nd||0} de ${online().length} completaram`;}
+
+/* ----- batata quente ----- */
+function bombBegin(){G.rd=0;bombRound(null);}
+function bombRound(starter){G.rd++;G.pr=takeFrom(BATATA,x=>'B|'+x);const on=online();const s=pBy(starter);G.hold=s&&s.on?starter:pick(on).i;
+  const f=FUSE[G.cfg.fuse];H.boom=Date.now()+ri(f[0],f[1])*1000;G.pn=0;G.ph='bp';G.lo=null;fx('start');}
+function bombAct(id,isH,k,d){
+  if(k==='pass'&&G.ph==='bp'&&id===G.hold&&d===G.pn){const me=pBy(id);let c=online().filter(p=>p.i!==id);
+    if(G.T&&me){const o=c.filter(p=>p.t!==me.t);if(o.length)c=o;}if(!c.length)return;G.hold=pick(c).i;G.pn++;fx('pass');return;}
+  if(k==='next'&&isH&&G.ph==='bx'){bombNext();return;}
+}
+function bombBoom(){if(G.ph!=='bp')return;G.ph='bx';G.lo=G.hold;const lp=pBy(G.lo);
+  if(G.T&&lp){G.T.forEach((t,k)=>{if(k!==lp.t)t.s+=1;});online().forEach(p=>{if(p.t!==lp.t)p.s+=1;});}
+  else online().forEach(p=>{if(p.i!==G.lo)p.s+=1;});
+  fx('boom');clearTimeout(H.auto);H.auto=setTimeout(()=>{if(G&&G.ph==='bx'){bombNext();pub();}},5000);}
+function bombNext(){clearTimeout(H.auto);if(G.rd>=G.cfg.rounds)final();else bombRound(G.lo);}
+
+/* =================== TELAS ONLINE =================== */
+function onTop(){const n=G?online().length:0;return `<div class="topbar"><span class="pill">🌐 <b>${esc(NET.code)}</b> · ${n} 👤</span>${G&&G.ph!=='lobby'?`<span class="pill">${GAMES[G.g].e} ${GAMES[G.g].n}</span>`:''}<button class="ghost" onclick="menuOv()">☰</button></div>`;}
+function menuOv(){
+  const sc=G?(G.T?G.T.map((t,i)=>({...t,col:COLORS[i]})):G.P.map(p=>({n:p.n,a:p.a,s:p.s}))):[];
+  $('sheet').innerHTML=`<div class="h2">☰ Menu</div>${G?`<div class="card"><h3>📊 PLACAR</h3>${boardHTML(sc,-1)}</div>`:''}
+   ${G?`<button class="wide btn-blue" onclick="closeOv();openHelp('${G.g}')">📜 Regras de ${GAMES[G.g].n}</button>`:''}
+   ${NET.host&&G&&G.ph!=='lobby'&&G.ph!=='fin'?`<button class="wide btn-gold" onclick="closeOv();act('end')">🏁 Terminar jogo e ver resultado</button><button class="wide btn-skip" onclick="closeOv();act('lobby')">🏠 Voltar pra sala</button>`:''}
+   <button class="wide btn-pink" onclick="closeOv();confirmLeave()">🚪 Sair da sala</button><button class="wide ghost" onclick="closeOv()">Fechar</button>`;
+  $('ov').classList.add('on');}
+function confirmLeave(){$('sheet').innerHTML=`<div class="h2">Sair da sala?</div><p class="sub">${NET.host?'Você é o anfitrião: se sair, a sala acaba para todos.':'Você pode entrar de novo com o código.'}</p><button class="wide btn-pink" onclick="closeOv();leaveRoom()">SAIR</button><button class="wide ghost" onclick="closeOv()">Ficar</button>`;$('ov').classList.add('on');}
+function nm(id){const p=pBy(id);return p?`${esc(p.a)} ${esc(p.n)}`:'Alguém';}
+function tnm(k){const t=G.T&&G.T[k];return t?`${esc(t.a)} ${esc(t.n)}`:'';}
+function hostBtn(k,label,cls='btn-pink',d){return NET.host?`<button class="wide ${cls}" onclick="act('${k}'${d!==undefined?','+JSON.stringify(d):''})">${label}</button>`:'';}
+function scoreBoard(cur){if(G.T)return boardHTML(G.T.map((t,i)=>({...t,col:COLORS[i]})),cur);
+  const list=G.P.filter(p=>p.on||p.s>0).map(p=>({n:p.n,a:p.a,s:p.s,i:p.i}));return boardHTML(list,list.findIndex(p=>p.i===cur));}
+function myTeam(){const me=pBy(NET.me);return me&&me.t!=null&&G.T?me.t:null;}
+function playersHTML(){return `<div class="plist">${G.P.filter(p=>p.on).map(p=>`<span class="pchip ${p.i===NET.me?'me':''}">${esc(p.a)} ${esc(p.n)}${p.i===NET.me?' (você)':''}${p.i===G.P[0].i?' 👑':''}</span>`).join('')}</div>`;}
+function teamsHTML(){const mt=myTeam();const un=online().filter(p=>p.t==null);
+  return `<div class="teams">${G.T.map((t,k)=>{const mem=online().filter(p=>p.t===k);return `<div class="tbox ${mt===k?'mine':''}" style="background:${COLORS[k]}44"><div class="th"><span class="ta">${esc(t.a)}</span><span>${esc(t.n)}</span><span class="small" style="margin-left:auto">${mem.length}</span></div>
+    ${mem.map(p=>`<button class="mem" ${NET.host?`onclick="act('move','${p.i}')"`:''}>${esc(p.a)} ${esc(p.n)}${p.i===NET.me?' (você)':''}</button>`).join('')}
+    ${mt!==k?`<button class="jb" style="background:${COLORS[k]}" onclick="act('team',${k})">Entrar ✋</button>`:''}</div>`;}).join('')}</div>
+   ${un.length?`<p class="small" style="text-align:center;margin-top:8px">⏳ Sem equipe: ${un.map(p=>esc(p.a)+' '+esc(p.n)).join(', ')}</p>`:''}
+   ${NET.host?'<p class="small" style="text-align:center">👑 Toque num jogador pra mudar ele de equipe.</p>':''}`;}
+function modeLabel(){return G.T?`👥 ${G.T.length} equipes`:'🙋 Cada um por si';}
+function cfgSummary(){const c=G.cfg,k=GAMES[G.g].kind;
+  if(k==='turn')return `${LVL[c.lvl]} · 🏁 ${c.meta} pts · ⏱ ${c.time}s`;
+  if(k==='quiz')return `${c.lvl&&G.g==='quiz'?LVL[c.lvl]+' · ':''}❓ ${c.n} perguntas · ⏱ ${c.time}s`;
+  if(k==='imp')return `${LVL[c.lvl]}${c.secret?' · 🤫 secreto':''}`;
+  if(k==='stop')return `🔁 ${c.rounds} rodadas · 📝 ${c.sc.length} categorias`;
+  return `💥 ${c.rounds} explosões`;}
+function hostEdit(){HS={g:G.g,tm:!!G.T,nt:G.T?G.T.length:2,tn:G.T?G.T.map(t=>t.n).concat(TEAMS.map(t=>t.n)).slice(0,6):TEAMS.map(t=>t.n),ta:G.T?G.T.map(t=>t.a).concat(TEAMS.map(t=>t.a)).slice(0,6):TEAMS.map(t=>t.a),cfg:JSON.parse(JSON.stringify(G.cfg)),inRoom:true};go('hostSetup');}
+
+SCR.on=()=>{
+  if(!G)return `${NET.code?onTop():''}<div class="spacer"></div><div class="bigemoji">📡</div><div class="h2">Conectando…</div>${waitHost(NET.code?'Procurando a sala '+esc(NET.code):'Abrindo a sala online')}<div class="spacer"></div>`;
+  const f=ONS[G.ph];return f?f():onTop();
+};
+const ONS={};
+ONS.lobby=()=>{const why=canStart();const gm=GAMES[G.g];
+  return `${onTop()}<div class="scroll">
+   <div class="card" style="text-align:center"><h3>📣 CÓDIGO DA SALA</h3><div class="bigcode">${esc(G.c)}</div><div class="small">Cada pessoa abre este mesmo link no celular, toca em <b>🔑 Entrar numa sala</b> e digita o código. Pode entrar quantos quiserem!</div></div>
+   <div class="card"><div class="row"><div class="me" style="font-size:40px;width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:${gm.c}">${gm.e}</div><div style="flex:1"><b style="font-size:20px">${gm.n}</b><div class="small">${modeLabel()} · ${cfgSummary()}</div></div></div>
+    <div class="row" style="margin-top:8px"><button class="ghost" style="flex:1" onclick="openHelp('${G.g}')">📜 Regras</button>${NET.host?`<button class="ghost" style="flex:1;background:#7c3aed" onclick="hostEdit()">⚙ Mudar jogo</button>`:''}</div></div>
+   <div class="card"><h3>${G.T?'👥 ESCOLHA SUA EQUIPE':'🙋 NA SALA'} (${online().length})</h3>${G.T?teamsHTML():playersHTML()}
+    ${NET.host&&G.T?`<button class="wide btn-gold" style="font-size:18px;padding:10px" onclick="act('shuffle')">🎲 Sortear equipes</button>`:''}</div>
+   ${reactBar()}
+  </div>
+  ${NET.host?`${why?`<div class="small" style="text-align:center">⚠️ ${why}</div>`:''}<button class="wide btn-ok" onclick="act('start')" ${why?'disabled':''}>COMEÇAR! 🎉</button>`:waitHost(myTeam()==null&&G.T?'Escolha uma equipe acima 👆':'Esperando o anfitrião começar')}`;};
+function readyNow(){L.rdy=G.gid;tap();buzz(30);NET.room&&NET.room.presence({rdy:G.gid}).catch(()=>{});if(NET.host)hostSync();render();}
+ONS.rules=()=>{const mt=myTeam();const ok=L.rdy===G.gid;const rl=G.rd2||[];
+  return `${onTop()}<div class="scroll">
+   <div class="role">${G.T&&mt!=null?`Você está na equipe ${tnm(mt)}`:'🙋 Cada um por si. Boa sorte!'}</div>
+   ${rulesHTML(G.g)}
+   <div class="card"><h3>✅ PRONTOS (${G.nr||0} de ${online().length})</h3><div class="readyl">${online().map(p=>`<span class="${rl.includes(p.i)?'ok':''}">${esc(p.a)} ${esc(p.n)}</span>`).join('')}</div></div>
+  </div>
+  ${ok?waitHost(NET.host?'Comece quando quiser':'Esperando o anfitrião começar'):`<button class="wide btn-ok" onclick="readyNow()">✅ ENTENDI! ESTOU PRONTO</button>`}
+  ${NET.host?`<button class="wide btn-pink" onclick="act('begin')">▶ COMEÇAR O JOGO (${G.nr||0}/${online().length} prontos)</button>`:''}`;};
+
+/* vez */
+function roleTxt(){return({mimica:['🎭','VOCÊ vai fazer a mímica!','Só você vê a palavra. Sem falar, sem apontar, sem som!'],desenho:['🎨','VOCÊ vai desenhar!','Só você vê a palavra. Nada de letras ou números!'],quemsou:['🤔','VOCÊ vai adivinhar!','Faça perguntas de SIM ou NÃO. Os outros veem a palavra.']})[G.g];}
+ONS.ti=()=>{const a=G.tu.a,isA=a===NET.me,mt=myTeam(),same=G.T&&mt===G.tu.t;const r=roleTxt();
+  const who=G.T?`<div class="teamname" style="color:${COLORS[G.tu.t]}">${tnm(G.tu.t)}</div>`:'';
+  let body;
+  if(isA)body=`<div class="bigemoji">${r[0]}</div><div class="h2">${r[1]}</div><p class="sub">${r[2]}</p><div class="spacer"></div>${HOLD('goAct','SEGURE para começar')}`;
+  else if(G.g==='quemsou')body=`<div class="bigemoji">👀</div><p class="sub"><b>${nm(a)}</b> vai adivinhar.<br>A palavra vai aparecer no SEU celular. Responda só <b>sim, não ou talvez</b>!</p><div class="spacer"></div>${waitHost('Esperando '+nm(a)+' começar')}`;
+  else if(G.T&&same)body=`<div class="bigemoji">🙌</div><p class="sub">É a vez da <b>sua equipe</b>!<br><b>${nm(a)}</b> vai ${G.g==='mimica'?'fazer a mímica':'desenhar'}. Prestem atenção e gritem os palpites!</p><div class="spacer"></div>${waitHost('Esperando '+nm(a)+' começar')}`;
+  else if(G.T)body=`<div class="bigemoji">🤫</div><p class="sub">Vez da equipe ${tnm(G.tu.t)}.<br>A palavra deles <b>não aparece</b> pra você. Fique quietinho e torça! 😈</p><div class="spacer"></div>${waitHost('Esperando '+nm(a)+' começar')}`;
+  else body=`<div class="bigemoji">🙋</div><p class="sub"><b>${nm(a)}</b> vai ${G.g==='mimica'?'fazer a mímica':'desenhar'}.<br>Todo mundo pode adivinhar: quem acertar primeiro ganha ponto junto com ele!</p><div class="spacer"></div>${waitHost('Esperando '+nm(a)+' começar')}`;
+  return `${onTop()}${scoreBoard(G.T?G.tu.t:a)}<p class="sub small" style="margin:4px 0">🏁 Meta: ${G.cfg.meta} pontos</p>${who}${body}
+   ${NET.host&&!isA?`<div class="mini"><button class="ghost" onclick="act('swap')">🔄 Trocar quem joga</button><button class="ghost" onclick="act('go')">▶ Começar por ele</button></div>`:''}${isA?'':reactBar()}`;};
+function hitAct(){if(!G.T&&G.g!=='quemsou'){L.pickWho=G.wid;render();return;}act('hit',{w:G.wid});}
+function hitBy(id){L.pickWho=0;act('hit',{w:G.wid,by:id});}
+function skipAct(){act('skip',{w:G.wid});}
+function goAct(){act('go');}
+ONS.tp=()=>{const a=G.tu.a,isA=a===NET.me,mt=myTeam(),same=G.T&&mt===G.tu.t,c=G.cfg;
+  const top=`${onTop()}<div class="top">${ringHTML()}<div style="text-align:center;flex:1">${G.T?`<div style="font-size:24px">${esc(G.T[G.tu.t].a)}</div><div style="font-weight:800;color:${COLORS[G.tu.t]}">${esc(G.T[G.tu.t].n)}</div>`:`<div style="font-weight:800">${nm(a)}</div>`}</div><div class="pts">${G.T?G.T[G.tu.t].s:(pBy(a)||{}).s||0}<small>pontos</small></div></div>`;
+  const skipB=`<button class="btn-skip" onclick="skipAct()" ${c.skips!==99&&G.sk<=0?'disabled':''}>⏭ Pular<br><span style="font-size:13px">${c.skips===99?'livre':'restam '+G.sk}</span></button>`;
+  const ctrls=`<div class="ctrls">${skipB}<button class="btn-ok" onclick="hitAct()">✔ ACERTOU!</button></div>`;
+  if(L.pickWho===G.wid&&(isA||NET.host))return `${onTop()}<div class="h2">🙋 Quem acertou?</div><p class="sub">Vocês dois ganham ${G.w.g?2:1} ponto${G.w.g?'s':''}!</p>
+   <div class="scroll"><div class="list">${online().filter(p=>p.i!==a).map(p=>`<button class="li vote" onclick="hitBy('${p.i}')"><span style="font-size:30px">${esc(p.a)}</span> ${esc(p.n)}</button>`).join('')}</div></div><button class="wide ghost" onclick="L.pickWho=0;render()">← Voltar</button>`;
+  if(G.g==='mimica'){
+    if(isA)return `${top}<div class="stage">${PEEK(wordInner(G.w),G.w.g?'gold':'','SEGURE para ver a palavra')}<p class="small" style="text-align:center;margin-top:14px">🤫 Sem falar, sem apontar, sem som!</p></div>${ctrls}`;
+    const mine=same||!G.T;
+    return `${top}<div class="stage"><div class="bigemoji">${mine?'🤔':'🤫'}</div><div class="result">${mine?'ADIVINHEM!':'SILÊNCIO!'}</div><p class="sub">${mine?'Gritem os palpites! 📣':`Vez da equipe ${tnm(G.tu.t)}.<br>Torça contra em silêncio 😈`}</p></div>
+     ${NET.host?`<div class="mini"><button class="ghost" onclick="skipAct()">⏭ Pular (juiz)</button><button class="ghost" onclick="hitAct()">✔ Acertou (juiz)</button></div>`:''}${reactBar()}`;}
+  if(G.g==='desenho'){
+    if(isA)return `${top}<div style="margin-top:6px">${wordBar(G.w)}</div>${canvasHTML(true)}${ctrls}`;
+    const mine=same||!G.T;
+    return `${top}<p class="sub" style="margin:4px 0">${mine?'🤔 <b>ADIVINHEM o desenho!</b> Gritem!':`🤫 Equipe ${tnm(G.tu.t)} adivinhando… quieto!`}</p>${canvasHTML(false)}
+     ${NET.host?`<div class="mini"><button class="ghost" onclick="skipAct()">⏭ Pular (juiz)</button><button class="ghost" onclick="hitAct()">✔ Acertou (juiz)</button></div>`:''}${reactBar()}`;}
+  if(isA)return `${top}<div class="stage"><div class="bigemoji" style="font-size:120px">❓</div><div class="result">PERGUNTE!</div><p class="sub">"É um animal?" "Cabe na mão?" "Tem em casa?"<br>As respostas aparecem aqui na tela 👇</p></div>
+    <div class="mini" style="justify-content:center"><button class="btn-skip" onclick="skipAct()" ${c.skips!==99&&G.sk<=0?'disabled':''}>⏭ Pular (${c.skips===99?'livre':G.sk})</button></div>`;
+  return `${top}<div class="stage" style="flex:none;min-height:34%"><div class="wcard ${G.w.g?'gold':''}" style="min-height:0;padding:16px">${wordInner(G.w)}</div></div>
+   <p class="small" style="text-align:center;margin:8px 0 0">Responda pra ${nm(a)}:</p>
+   <div class="qa"><button class="btn-ok" onclick="react('SIM ✅',1)">SIM</button><button class="btn-pink" onclick="react('NÃO ❌',1)">NÃO</button><button class="btn-gold" onclick="react('TALVEZ 🤷',1)">TALVEZ</button></div>
+   <div class="spacer"></div>${ctrls}`;};
+ONS.tr=()=>{const r=G.res,a=G.tu.a;const nxt=G.T?`Próxima: equipe ${tnm((G.tu.t+1)%G.T.length)}`:'';
+  return `${onTop()}${scoreBoard(G.T?G.tu.t:a)}<div class="spacer"></div><div class="bigemoji">${r.ok?'🎉':'⏰'}</div>
+   <div class="result" style="color:${r.ok?'#4ade80':'#f87171'}">${r.ok?`ACERTOU! +${r.p}`:'TEMPO ESGOTADO!'}</div>
+   <p class="sub">${r.ok?(G.T?`Ponto pra ${tnm(G.tu.t)}!`:r.by?`${nm(a)} e ${nm(r.by)} ganharam ponto!`:`${nm(a)} ganhou ponto!`):'Ninguém pontuou dessa vez.'}</p>
+   <p class="sub">A palavra era <b style="color:#fde68a;font-size:24px">${esc(r.w)}</b></p><p class="small" style="text-align:center">${nxt}</p><div class="spacer"></div>
+   ${NET.host?hostBtn('next','PRÓXIMA VEZ ▶'):waitHost('Próxima vez em instantes')}${reactBar()}`;};
+
+/* quiz */
+function ansAct(o){L.ans[G.gid+'-'+G.qi]=o;tap();act('ans',{q:G.qi,o});render();}
+ONS.qq=()=>{const my=L.ans[G.gid+'-'+G.qi];const me=pBy(NET.me)||{s:0,st:0};
+  return `${onTop()}<div class="top">${ringHTML()}<div style="flex:1;text-align:center"><span class="pill">${esc(G.q.s)}</span><div class="small" style="margin-top:4px">Pergunta ${G.qi} de ${G.cfg.n}</div></div><div class="pts">${me.s}<small>${me.st>=2?'🔥 '+me.st+' seguidas':'pontos'}</small></div></div>
+   ${qHead(G.q)}
+   ${my===undefined?optsHTML(G.q,null,'ansAct'):`<div class="opts" ${G.q.o.length===2?'style="grid-template-columns:1fr"':''}>${G.q.o.map((o,i)=>`<button class="opt o${G.q.o.length===2?(i?0:3):i} ${i===my?'':'dim'}">${esc(o)}</button>`).join('')}</div><div class="result" style="font-size:26px">✅ Resposta enviada!</div>`}
+   ${waitHost(`${G.na} de ${online().length} responderam`)}<div class="spacer"></div>${NET.host?`<button class="ghost" style="margin:0 auto;display:block" onclick="act('reveal')">Mostrar resposta agora</button>`:''}`;};
+ONS.qr=()=>{const r=G.rs[NET.me];const ok=r&&r[1]>0;const ranked=G.P.filter(p=>p.on||p.s).slice().sort((a,b)=>b.s-a.s).slice(0,6);
+  return `${onTop()}${qHead(G.q)}${optsHTML(G.q,{ok:G.ok,ch:r?r[0]:-1})}
+   <div class="result" style="color:${ok?'#4ade80':'#f87171'};font-size:30px">${ok?`🎉 +${r[1]} pontos!${r[2]>=2?` 🔥x${r[2]}`:''}`:r?'❌ Errou!':'⏰ Não respondeu'}</div>
+   ${G.q.x?`<div class="expl">🤓 ${esc(G.q.x)}</div>`:''}
+   <div class="scroll" style="margin-top:8px">${G.T?scoreBoard(-1):`<div class="list">${ranked.map((p,k)=>`<div class="li" style="${p.i===NET.me?'outline:2px solid #fde68a':''}"><span>${k+1}º ${esc(p.a)} ${esc(p.n)} ${G.rs[p.i]&&G.rs[p.i][1]>0?'✅':''}</span><span class="tag" style="background:#7c3aed">${p.s}</span></div>`).join('')}</div>`}</div>
+   ${NET.host?hostBtn('next',G.qi>=G.cfg.n?'VER RESULTADO 🏆':'PRÓXIMA PERGUNTA ▶'):waitHost()}`;};
+
+/* impostor */
+function voteAct(id){L.vote[G.gid+'-'+G.rd]=id;tap();act('vote',id);render();}
+ONS.ic=()=>{const isI=G.imp===NET.me;const c=G.cfg;
+  return `${onTop()}<p class="sub">Rodada ${G.rd} · ${online().length} jogadores</p>
+   <div class="stage" style="flex:none;min-height:40%">${PEEK(impCard(isI,G.w,G.iw,c.hint),isI&&!G.iw?'imp':'','SEGURE para ver sua carta')}</div>
+   <div class="card" style="margin-top:14px"><h3>📢 ORDEM DE QUEM FALA</h3><div class="plist">${(G.ord||[]).map((id,k)=>`<span class="pchip ${id===NET.me?'me':''}">${k+1}º ${nm(id)}</span>`).join('')}</div>
+   <div class="small" style="margin-top:6px">Cada um fala UMA palavra sobre o segredo. Façam 2 voltas!</div></div>
+   <div class="spacer"></div>${NET.host?hostBtn('vote0','🗳️ IR PARA VOTAÇÃO'):waitHost('Quando todos falarem, o anfitrião abre a votação')}${reactBar()}`;};
+ONS.iv=()=>{const mv=L.vote[G.gid+'-'+G.rd];
+  return `${onTop()}<div class="h2">🗳️ Quem é o impostor?</div>
+   ${mv?`<div class="bigemoji">✅</div><p class="sub">Você votou em <b>${nm(mv)}</b></p>`:`<div class="scroll"><div class="list">${online().filter(p=>p.i!==NET.me).map(p=>`<button class="li vote" onclick="voteAct('${p.i}')"><span style="font-size:30px">${esc(p.a)}</span> ${esc(p.n)}</button>`).join('')}</div></div>`}
+   ${waitHost(`${G.nv} de ${online().length} votaram`)}${mv?'<div class="spacer"></div>':''}${NET.host?hostBtn('close','Encerrar votação','btn-skip'):''}`;};
+ONS.ir=()=>{const r=G.res;
+  return `${onTop()}<p class="sub" style="margin-top:6px">O impostor era…</p><div class="teamname" style="color:#f87171">${nm(G.imp)}</div>
+   <p class="sub">A palavra era <b style="color:#fde68a;font-size:24px">${esc(G.w.w)}</b>${G.iw?`<br>O impostor tinha: <b style="color:#f87171">${esc(G.iw.w)}</b>`:''}</p>
+   <div class="result" style="font-size:28px">${r.c?'🎉 PEGARAM O IMPOSTOR! +1':'😈 O IMPOSTOR ESCAPOU! +2'}${r.g?'<br>🤯 E ele adivinhou a palavra! +2':''}</div>
+   <div class="scroll"><div class="list">${Object.keys(r.n).sort((a,b)=>r.n[b]-r.n[a]).map(k=>`<div class="li"><span>${nm(k)}</span><span class="tag" style="background:${k===G.imp?'#ef4444':'#52525b'}">${r.n[k]} voto${r.n[k]>1?'s':''}</span></div>`).join('')}</div>
+   <div style="margin-top:10px">${scoreBoard(-1)}</div></div>
+   ${NET.host?(r.c&&!r.g&&!G.iw?hostBtn('guess','🤔 Impostor adivinhou a palavra? (+2)','btn-gold'):'')+hostBtn('next','NOVA RODADA 🔄','btn-ok')+hostBtn('end','Terminar e ver o placar','ghost'):waitHost()}${reactBar()}`;};
+
+/* stop */
+ONS.stp=()=>{const c=G.cfg;const full=L.stop.every(x=>x&&x.trim());
+  return `${onTop()}<div class="top">${ringHTML()}<div style="flex:1;text-align:center"><div class="small">Rodada ${G.rd} de ${c.rounds} · LETRA</div><div class="letter">${esc(G.L)}</div></div><div style="width:86px"></div></div>
+   <div class="scroll" id="stopform" data-k="${stopKey()}">${c.sc.map((s,j)=>`<div class="sfield"><label>${esc(s)}</label><input autocomplete="off" autocorrect="off" spellcheck="false" maxlength="24" placeholder="${esc(G.L)}…" value="${esc(L.stop[j]||'')}" oninput="stopIn(${j},this)"></div>`).join('')}
+   <p class="small" id="stopnd" style="text-align:center">${G.nd||0} de ${online().length} completaram</p></div>
+   <button class="wide btn-pink" id="stopbtn" style="font-size:30px" onclick="stopPress()" ${full?'':'disabled'}>✋ STOP!</button>`;};
+ONS.sx=()=>`${onTop()}<div class="spacer"></div><div class="bigemoji" style="font-size:130px">✋</div><div class="result" style="font-size:60px">STOP!</div><p class="sub">${G.sb?`${nm(G.sb)} gritou STOP!`:'⏰ O tempo acabou!'}<br>Contando os pontos…</p><div class="spacer"></div>`;
+function stopAnsFor(id){if(G.sa&&G.sa[id])return G.sa[id];return playerAnswers(id)||[];}
+ONS.sv=()=>{const c=G.cfg;const ids=Object.keys(G.sp||{});const inv=new Set(G.inv||[]);
+  const tot=id=>(G.sp[id]||[]).reduce((a,b)=>a+b,0);
+  return `${onTop()}<div class="row" style="justify-content:space-between"><div class="h2" style="font-size:28px;margin:0">Letra ${esc(G.L)}</div><span class="pill">Rodada ${G.rd}/${c.rounds}</span></div>
+   ${NET.host?'<p class="small" style="text-align:center;margin:2px 0">👑 Toque numa resposta errada pra anular.</p>':''}
+   <div class="scroll">${c.sc.map((s,j)=>`<div class="card" style="padding:10px"><h3>${esc(s)}</h3>${ids.map(id=>{const a=stopAnsFor(id)[j]||'';const p=G.sp[id][j];const iv=inv.has(id+'|'+j);
+     return `<button class="srow ${iv?'inv':''}" ${NET.host&&a?`onclick="act('inv',{i:'${id}',j:${j}})"`:''}><span>${nm(id)}: <span class="w">${a?esc(a):'—'}</span></span><span class="pt p${p}">${p}</span></button>`;}).join('')}</div>`).join('')}
+    <div class="card"><h3>🧮 PONTOS DA RODADA</h3>${ids.sort((a,b)=>tot(b)-tot(a)).map(id=>`<div class="srow"><span>${nm(id)}</span><span class="pt p10">+${tot(id)}</span></div>`).join('')}</div></div>
+   ${NET.host?hostBtn('next',G.rd>=c.rounds?'VER RESULTADO 🏆':'PRÓXIMA LETRA ▶','btn-ok'):waitHost('O anfitrião confere as respostas')}`;};
+
+/* batata */
+function passAct(){act('pass',G.pn);}
+ONS.bp=()=>{const me=G.hold===NET.me;
+  if(me)return `${onTop()}<div class="spacer"></div><div class="h2" style="color:#fde68a">ESTÁ COM VOCÊ!</div><div class="prompt">${esc(G.pr)}</div><div class="bomb">💣</div>
+   <p class="sub">Fale sua resposta em voz alta e passe rápido!</p><div class="spacer"></div><button class="wide btn-pink" style="font-size:32px;padding:26px" onclick="passAct()">FALEI! PASSAR 💣➡</button>`;
+  return `${onTop()}${scoreBoard(-1)}<div class="spacer"></div><div class="prompt">${esc(G.pr)}</div><div class="bigemoji">💣</div>
+   <p class="sub">A bomba está com <b>${nm(G.hold)}</b>${G.T&&pBy(G.hold)&&pBy(G.hold).t!=null?` (${tnm(pBy(G.hold).t)})`:''}!<br>Prepare sua resposta… pode vir pra você! 😱</p>
+   <p class="small" style="text-align:center">Explosão ${G.rd} de ${G.cfg.rounds} · ${G.pn} passes</p><div class="spacer"></div>${reactBar()}`;};
+ONS.bx=()=>{const lp=pBy(G.lo);
+  return `${onTop()}<div class="boom">💥</div><div class="teamname" style="color:#f87171">${nm(G.lo)} explodiu!</div>
+   <p class="sub">${G.T&&lp&&lp.t!=null?`As outras equipes ganharam 1 ponto!`:'Todos os outros ganharam 1 ponto!'}</p>${scoreBoard(-1)}<div class="spacer"></div>
+   ${NET.host?hostBtn('next',G.rd>=G.cfg.rounds?'VER RESULTADO 🏆':'PRÓXIMA BOMBA 💣'):waitHost('Próxima bomba em instantes')}${reactBar()}`;};
+
+/* final */
+ONS.fin=()=>{const list=G.T?G.T.map((t,i)=>({...t,col:COLORS[i]})):G.P.filter(p=>p.on||p.s).map(p=>({n:p.n,a:p.a,s:p.s}));
+  const ps=G.P.filter(p=>p.s>0).slice().sort((a,b)=>b.s-a.s);let aw='';
+  if(G.T&&ps.length)aw+=`<div class="award"><span class="ae">⭐</span><span>Destaque do jogo: ${esc(ps[0].a)} ${esc(ps[0].n)}</span></div>`;
+  if(GAMES[G.g].kind==='quiz'){const b=G.P.slice().sort((a,b)=>(b.ok||0)-(a.ok||0))[0];if(b&&b.ok)aw+=`<div class="award"><span class="ae">🎯</span><span>Mais acertos: ${esc(b.a)} ${esc(b.n)} (${b.ok})</span></div>`;}
+  return `${onTop()}<div class="h2">🏆 RESULTADO</div><p class="sub">${winnerMsg(list)}</p><div class="scroll">${aw}${podiumHTML(list)}</div>
+   ${NET.host?hostBtn('again','REVANCHE! 🔥','btn-ok')+hostBtn('lobby','🎮 Escolher outro jogo','btn-blue'):waitHost('O anfitrião escolhe o próximo jogo')}${reactBar()}`;};
+
+render();
+
+</script>
+</body>
+</html>
